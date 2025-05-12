@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LeadingIcon extends StatelessWidget {
   final String section;
@@ -12,19 +13,25 @@ class LeadingIcon extends StatelessWidget {
       return const Icon(Icons.apps_rounded, color: Colors.blue);
     } else if (section == "AD_UNIT") {
       if (value.contains("banner")) {
-        return const Icon(Icons.view_module_rounded, color: Colors.green);
+        return SvgPicture.asset('assets/images/banner.svg', width: 40);
       } else if (value.contains("interstitial")) {
-        return const Icon(Icons.fullscreen_rounded, color: Colors.red);
+        return SvgPicture.asset('assets/images/interstitial.svg', width: 40);
       } else if (value.contains("native")) {
-        return const Icon(Icons.widgets_rounded, color: Colors.purple);
+        return SvgPicture.asset('assets/images/native.svg', width: 40);
+      } else if (value.contains("rewarded")) {
+        return SvgPicture.asset('assets/images/rewarded.svg', width: 40);
+      } else if (value.contains("app")) {
+        return SvgPicture.asset('assets/images/app-open.svg', width: 40);
+      } else if (value.contains("rewarded-interstitial")) {
+        return SvgPicture.asset('assets/images/rewarded-interstitial.svg',
+            width: 40);
       } else {
         return const Icon(Icons.ad_units_rounded, color: Colors.orange);
       }
     } else if (section == "COUNTRY") {
-      return CircleAvatar(
-        backgroundImage: NetworkImage(
-          "https://flagcdn.com/w40/${value.toLowerCase()}.png",
-        ),
+      return Image.network(
+        "https://flagcdn.com/w320/${value.toLowerCase()}.png",
+        width: 30,
       );
     }
     return const Icon(Icons.help_outline, color: Colors.grey);

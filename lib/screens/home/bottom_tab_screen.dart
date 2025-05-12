@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_update/in_app_update.dart';
 
-import 'tabs_screen.dart';
 import '../apps/apps_screen.dart';
 import '../account/account_screen.dart';
+import 'tabs_screen.dart';
 
 class BottomTabScreen extends StatefulWidget {
   const BottomTabScreen({super.key});
@@ -16,9 +17,25 @@ class _BottomTabScreenState extends State<BottomTabScreen> {
   late List<Map<String, dynamic>> _pages;
   int _selectedPageIndex = 0;
 
+  Future<void> _checkForUpdate() async {
+    await InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+          _update();
+        }
+      });
+    }).catchError((error) {});
+  }
+
+  void _update() async {
+    await InAppUpdate.startFlexibleUpdate();
+    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((error) {});
+  }
+
   @override
   void initState() {
     super.initState();
+    _checkForUpdate();
     _pages = [
       {'page': const TabsScreen()},
       {'page': const AppsScreen()},
@@ -49,8 +66,8 @@ class _BottomTabScreenState extends State<BottomTabScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.circle_grid_3x3),
-            activeIcon: Icon(CupertinoIcons.circle_grid_3x3_fill),
+            icon: Icon(CupertinoIcons.square_grid_3x2),
+            activeIcon: Icon(CupertinoIcons.square_grid_3x2_fill),
             label: 'Apps',
           ),
           BottomNavigationBarItem(

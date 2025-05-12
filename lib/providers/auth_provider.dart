@@ -39,7 +39,7 @@ class AuthProvider extends ChangeNotifier {
         await _fetchAdMobAccountId();
       }
     } catch (error) {
-      print('Error during silent sign-in: $error');
+      throw Exception('Error during silent sign-in: $error');
     }
 
     _isLoading = false;
@@ -57,7 +57,7 @@ class AuthProvider extends ChangeNotifier {
         await _fetchAdMobAccountId();
       }
     } catch (error) {
-      print('Login failed: $error');
+      throw Exception('Login failed: $error');
     }
 
     _isLoading = false;
@@ -88,12 +88,8 @@ class AuthProvider extends ChangeNotifier {
       if (data['account'] != null && data['account'].isNotEmpty) {
         _accountId = data['account'][0]['publisherId'];
         notifyListeners();
-      } else {
-        print('No AdMob account found.');
-      }
-    } else {
-      print('Failed to fetch AdMob accountId: ${response.body}');
-    }
+      } else {}
+    } else {}
   }
 
   Future<void> logout() async {

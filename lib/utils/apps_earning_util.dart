@@ -63,6 +63,10 @@ class AppsEarningUtil {
         throw Exception("Invalid tab index");
     }
 
+    if (dimensionName == 'AD_UNIT' && !dimensions.contains('FORMAT')) {
+      dimensions.add('FORMAT');
+    }
+
     return {
       "startDate": startDate,
       "endDate": endDate,

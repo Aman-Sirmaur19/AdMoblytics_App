@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../utils/utils.dart';
 import '../../utils/earnings_util.dart';
+import '../../providers/apps_provider.dart';
 import '../../screens/home/card_summary_screen.dart';
+import '../app_icon.dart';
 import '../custom_tab_indicator.dart';
 import 'leading_icon.dart';
 import 'trailing_widget.dart';
@@ -75,6 +79,8 @@ class EarningsSectionDetails extends StatelessWidget {
     required dynamic data,
     required BuildContext context,
   }) {
+    final appsProvider = Provider.of<AppsProvider>(context, listen: false);
+    final apps = appsProvider.apps;
     List sortedData = List.from(data);
     EarningsUtil.sortDataByTab(tabName, sortedData);
     return ListView(
@@ -83,6 +89,8 @@ class EarningsSectionDetails extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
             child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+              horizontalTitleGap: 10,
               tileColor: Theme.of(context).colorScheme.primaryContainer,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -99,16 +107,48 @@ class EarningsSectionDetails extends StatelessWidget {
                                     ['dimensionValues'][section]['value'],
                               )))
                   : null,
-              leading: LeadingIcon(
-                section: section,
-                value: sortedData[index]['row']['dimensionValues'][section]
-                    ['value'],
+              leading: section == 'APP'
+                  ? AppIcon(
+                      appId: Utils.getAppStoreId(
+                          apps,
+                          sortedData[index]['row']['dimensionValues'][section]
+                              ['displayLabel']))
+                  : CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.background,
+                      radius: 22,
+                      child: LeadingIcon(
+                        section: section,
+                        value: sortedData[index]['row']['dimensionValues']
+                                [section == 'AD_UNIT' ? 'FORMAT' : section]
+                            ['value'],
+                      ),
+                    ),
+              title: Text(
+                sortedData[index]['row']['dimensionValues'][section]
+                    [section == 'COUNTRY' ? 'value' : 'displayLabel'],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: Colors.grey.shade600, fontWeight: FontWeight.bold),
               ),
-              title: Text(sortedData[index]['row']['dimensionValues'][section]
-                  [section == 'COUNTRY' ? 'value' : 'displayLabel']),
-              trailing: TrailingWidget(
-                tabName: tabName,
-                item: sortedData[index],
+              subtitle: section == 'AD_UNIT'
+                  ? Text(
+                      sortedData[index]['row']['dimensionValues']['FORMAT']
+                          ['value'],
+                      style: const TextStyle(
+                          color: Colors.grey, fontWeight: FontWeight.bold),
+                    )
+                  : null,
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context).colorScheme.background,
+                ),
+                child: TrailingWidget(
+                  tabName: tabName,
+                  item: sortedData[index],
+                ),
               ),
             ),
           ),

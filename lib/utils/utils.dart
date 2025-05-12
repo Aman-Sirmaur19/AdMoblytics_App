@@ -15,4 +15,17 @@ class Utils {
       debugPrint(chunk);
     }
   }
+
+  static String? getAppStoreId(
+      List<Map<String, dynamic>> appsList, String targetDisplayName) {
+    for (final app in appsList) {
+      final manualName = app['manualAppInfo']?['displayName'];
+      final linkedName = app['linkedAppInfo']?['displayName'];
+
+      if (manualName == targetDisplayName || linkedName == targetDisplayName) {
+        return app['linkedAppInfo']?['appStoreId'];
+      }
+    }
+    return null; // if no match found
+  }
 }

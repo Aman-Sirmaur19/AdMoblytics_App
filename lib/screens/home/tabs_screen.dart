@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/tab_provider.dart';
 import '../../widgets/custom_tab_indicator.dart';
+import '../dashboard_screen.dart';
 import 'home_screen.dart';
 
 class TabsScreen extends StatefulWidget {
@@ -53,6 +55,16 @@ class _TabsScreenState extends State<TabsScreen>
           return Scaffold(
             appBar: AppBar(
               title: const Text('AdMob Dashboard'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) => const DashboardScreen())),
+                  tooltip: 'Dashboard',
+                  icon: const Icon(CupertinoIcons.square_grid_2x2),
+                ),
+              ],
               bottom: TabBar(
                 isScrollable: true,
                 controller: _tabController,

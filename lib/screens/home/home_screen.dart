@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/admob_service.dart';
 import '../../utils/earnings_util.dart';
 import '../../utils/apps_earning_util.dart';
+import '../../services/admob_service.dart';
 import '../../providers/tab_provider.dart';
+import '../../providers/apps_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/earnings/earnings_grid.dart';
@@ -35,7 +36,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Map<String, dynamic>> _loadAllReports(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final appsProvider = Provider.of<AppsProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
+
+    if (!appsProvider.isLoaded) {
+      final publishedApps = await admobService.fetchPublishedApps(
+        accessToken: authProvider.accessToken!,
+        accountId: authProvider.accountId!,
+      );
+      final appsList =
+          (publishedApps['apps'] as List).cast<Map<String, dynamic>>();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        appsProvider.setApps(appsList);
+      });
+    }
+
     final tabIndex =
         Provider.of<TabProvider>(context, listen: false).selectedTabIndex;
 

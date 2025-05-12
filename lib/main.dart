@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'utils/theme.dart';
 import 'providers/tab_provider.dart';
+import 'providers/apps_provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/bottom_tab_screen.dart';
@@ -18,6 +19,7 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
       ChangeNotifierProvider(create: (_) => TabProvider()),
+      ChangeNotifierProvider(create: (_) => AppsProvider()),
     ],
     child: const MyApp(),
   ));
@@ -47,7 +49,7 @@ class AuthWrapper extends StatelessWidget {
     if (authProvider.isLoading) {
       return const Center(child: CircularProgressIndicator(color: Colors.blue));
     }
-    return authProvider.user != null
+    return authProvider.accountId != null && authProvider.user != null
         ? const BottomTabScreen()
         : const LoginScreen();
   }
