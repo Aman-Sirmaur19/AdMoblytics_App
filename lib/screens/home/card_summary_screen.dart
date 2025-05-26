@@ -37,7 +37,7 @@ class _CardSummaryScreenState extends State<CardSummaryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 8, vsync: this);
+    _tabController = TabController(length: 9, vsync: this);
     _tabController.addListener(_handleTabChange);
     _future = _loadAllReports(context);
   }
@@ -146,8 +146,8 @@ class _CardSummaryScreenState extends State<CardSummaryScreen>
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-        length: 8,
-        initialIndex: 0,
+        length: 9,
+        initialIndex: 2,
         child: Consumer<TabProvider>(builder: (context, tabProvider, child) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (_tabController.index != tabProvider.selectedTabIndex) {
@@ -183,8 +183,9 @@ class _CardSummaryScreenState extends State<CardSummaryScreen>
                     Provider.of<TabProvider>(context, listen: false)
                         .updateTabIndex(index),
                 tabs: const <Widget>[
-                  Tab(text: 'Today'),
+                  Tab(text: 'Custom'),
                   Tab(text: 'Yesterday'),
+                  Tab(text: 'Today'),
                   Tab(text: 'Last 7 days'),
                   Tab(text: 'This month'),
                   Tab(text: 'Last month'),
@@ -198,7 +199,7 @@ class _CardSummaryScreenState extends State<CardSummaryScreen>
             body: TabBarView(
               controller: _tabController,
               children: List.generate(
-                8,
+                9,
                 (index) => RefreshIndicator(
                   onRefresh: _refresh,
                   color: Colors.blue,

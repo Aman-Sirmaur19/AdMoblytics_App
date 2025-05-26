@@ -5,7 +5,7 @@ class EarningsUtil {
     List<String> dimensions = ["DATE"];
 
     switch (selectedTabIndex) {
-      case 0: // Today
+      case 0: // Custom
         startDate = currentDate;
         endDate = currentDate;
         break;
@@ -15,19 +15,24 @@ class EarningsUtil {
         endDate = currentDate.subtract(const Duration(days: 1));
         break;
 
-      case 2: // Last 7 days
+      case 2: // Today
+        startDate = currentDate;
+        endDate = currentDate;
+        break;
+
+      case 3: // Last 7 days
         startDate = currentDate.subtract(const Duration(days: 7));
         endDate = currentDate;
         dimensions = [];
         break;
 
-      case 3: // This month
+      case 4: // This month
         startDate = DateTime(currentDate.year, currentDate.month, 1);
         endDate = currentDate;
         dimensions = ["MONTH"];
         break;
 
-      case 4: // Last month
+      case 5: // Last month
         final lastMonth = DateTime(currentDate.year, currentDate.month - 1, 1);
         startDate = lastMonth;
         endDate = DateTime(currentDate.year, currentDate.month, 1)
@@ -35,19 +40,19 @@ class EarningsUtil {
         dimensions = ["MONTH"];
         break;
 
-      case 5: // This year
+      case 6: // This year
         startDate = DateTime(currentDate.year, 1, 1);
         endDate = currentDate;
         dimensions = [];
         break;
 
-      case 6: // Last year
+      case 7: // Last year
         startDate = DateTime(currentDate.year - 1, 1, 1);
         endDate = DateTime(currentDate.year - 1, 12, 31);
         dimensions = [];
         break;
 
-      case 7: // Total
+      case 8: // Total
         startDate = DateTime(1970, 1, 1); // Example: start from epoch
         endDate = currentDate;
         dimensions = [];

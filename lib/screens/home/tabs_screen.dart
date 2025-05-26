@@ -21,7 +21,7 @@ class _TabsScreenState extends State<TabsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 8, vsync: this);
+    _tabController = TabController(length: 9, vsync: this);
     _tabController.addListener(_handleTabChange);
   }
 
@@ -43,8 +43,8 @@ class _TabsScreenState extends State<TabsScreen>
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
-      initialIndex: 0,
+      length: 9,
+      initialIndex: 2,
       child: Consumer<TabProvider>(
         builder: (context, tabProvider, child) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -82,8 +82,9 @@ class _TabsScreenState extends State<TabsScreen>
                     Provider.of<TabProvider>(context, listen: false)
                         .updateTabIndex(index),
                 tabs: const <Widget>[
-                  Tab(text: 'Today'),
+                  Tab(text: 'Custom'),
                   Tab(text: 'Yesterday'),
+                  Tab(text: 'Today'),
                   Tab(text: 'Last 7 days'),
                   Tab(text: 'This month'),
                   Tab(text: 'Last month'),
@@ -95,7 +96,7 @@ class _TabsScreenState extends State<TabsScreen>
             ),
             body: TabBarView(
               controller: _tabController,
-              children: List.generate(8, (index) => const HomeScreen()),
+              children: List.generate(9, (index) => const HomeScreen()),
             ),
           );
         },

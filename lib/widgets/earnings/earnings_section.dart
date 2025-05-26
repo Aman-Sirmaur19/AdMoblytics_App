@@ -181,12 +181,19 @@ class EarningsSection extends StatelessWidget {
                       ),
                     ),
               title: Text(
-                sortedData[index]['row']['dimensionValues'][section]
-                    [section == 'COUNTRY' ? 'value' : 'displayLabel'],
+                section == 'COUNTRY'
+                    ? (Utils.countryCodeToName[sortedData[index]['row']
+                            ['dimensionValues'][section]['value']] ??
+                        sortedData[index]['row']['dimensionValues'][section]
+                            ['value'])
+                    : sortedData[index]['row']['dimensionValues'][section]
+                        ['displayLabel'],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               subtitle: section == 'AD_UNIT'
                   ? Text(

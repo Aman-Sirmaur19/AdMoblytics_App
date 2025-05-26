@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "459439556718-3vjlqmhussfl7krikbctbjvgs3g5vl0k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sirmaur.admoblytics",
+            "certificate_hash": "773ff89ce0dda6950d9ceb44d0e5cf1136525d2d"
+          }
+        },
+        {
           "client_id": "459439556718-4gn8hjlv13bup2gj5i1k0r7i0raqpcld.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

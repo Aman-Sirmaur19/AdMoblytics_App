@@ -75,7 +75,7 @@ class LoginScreen extends StatelessWidget {
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        '📊 See your apps performance\n📈 Get user trends\n💸 Check earning and payments',
+                        '📊 See your apps performance\n📈 Get user trends\n💸 Check your apps earning',
                         style: TextStyle(fontSize: 15, color: Colors.grey),
                       ),
                     ],

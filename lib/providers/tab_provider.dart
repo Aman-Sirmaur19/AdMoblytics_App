@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TabProvider with ChangeNotifier {
-  int _selectedTabIndex = 0;
+  int _selectedTabIndex = 2;
 
   int get selectedTabIndex => _selectedTabIndex;
 

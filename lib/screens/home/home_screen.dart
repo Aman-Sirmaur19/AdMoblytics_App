@@ -21,6 +21,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<Map<String, dynamic>> _future;
+  TabProvider? _tabProvider;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _refresh() async {
+    if (_isDisposed) return;
     setState(() {
       _future = _loadAllReports(context);
     });
@@ -54,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final tabIndex =
         Provider.of<TabProvider>(context, listen: false).selectedTabIndex;
 
+    print('Selected Tab Index: $tabIndex');
     final earningsGridRange = EarningsUtil.getDateRange(tabIndex);
     final appRange = AppsEarningUtil(tabIndex: tabIndex, dimensionName: 'APP')
         .getDateRange();
@@ -115,6 +119,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Store tabProvider reference safely
+    _tabProvider ??= Provider.of<TabProvider>(context);
+    _tabProvider!.addListener(_onTabIndexChanged);
+  }
+
+  void _onTabIndexChanged() {
+    _refresh(); // Trigger fetch with updated tab index
+  }
+
+  @override
+  void dispose() {
+    // Use the stored reference instead of accessing context
+    _tabProvider?.removeListener(_onTabIndexChanged);
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: const CustomBannerAd(),
@@ -133,9 +158,37 @@ class _HomeScreenState extends State<HomeScreen> {
             }
             final data = snapshot.data!;
             return Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ListView(
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      RichText(
+                          text: TextSpan(
+                        text: ' Date: ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: '25/05/2025',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.blueGrey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        ],
+                      )),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('Choose Date'),
+                      ),
+                    ],
+                  ),
                   EarningsGrid(data: data['earningsGrid']),
                   const SizedBox(height: 10),
                   EarningsSection(section: 'APP', data: data['app']),
