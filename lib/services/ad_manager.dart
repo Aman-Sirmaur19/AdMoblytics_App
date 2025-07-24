@@ -53,7 +53,7 @@ class AdManager {
 
   void incrementNavigationCount() {
     _navigationCount++;
-    if (_navigationCount >= 5) {
+    if (_navigationCount >= 100) {
       showInterstitialAd();
       _navigationCount = 0;
     }

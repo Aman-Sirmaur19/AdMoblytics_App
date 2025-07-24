@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData lightMode = ThemeData(
   brightness: Brightness.light,
+  fontFamily: 'Fredoka',
   appBarTheme: const AppBarTheme(
     centerTitle: true,
     backgroundColor: Color(0xFFF5F5F3),
@@ -21,8 +22,9 @@ ThemeData lightMode = ThemeData(
     headerBackgroundColor: Colors.blue,
     headerForegroundColor: Colors.white,
     todayBorder: const BorderSide(color: Colors.blue),
+    rangeSelectionBackgroundColor: Colors.grey.shade400,
     todayForegroundColor: MaterialStateColor.resolveWith((states) =>
-        states.contains(MaterialState.selected) ? Colors.white : Colors.black),
+        states.contains(MaterialState.selected) ? Colors.blue : Colors.black),
     todayBackgroundColor: MaterialStateColor.resolveWith((states) =>
         states.contains(MaterialState.selected)
             ? Colors.blue
@@ -61,6 +63,7 @@ ThemeData lightMode = ThemeData(
 
 ThemeData darkMode = ThemeData(
   brightness: Brightness.dark,
+  fontFamily: 'Fredoka',
   appBarTheme: const AppBarTheme(
     centerTitle: true,
     backgroundColor: Colors.black,
@@ -82,7 +85,7 @@ ThemeData darkMode = ThemeData(
     todayBorder: const BorderSide(color: Colors.blue),
     todayForegroundColor: MaterialStateColor.resolveWith((states) =>
         states.contains(MaterialState.selected)
-            ? Colors.white
+            ? Colors.blue
             : Colors.grey.shade300),
     todayBackgroundColor: MaterialStateColor.resolveWith((states) =>
         states.contains(MaterialState.selected)

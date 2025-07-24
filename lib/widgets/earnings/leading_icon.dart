@@ -10,7 +10,11 @@ class LeadingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (section == "APP") {
-      return const Icon(Icons.apps_rounded, color: Colors.blue);
+      return const Icon(
+        Icons.android_rounded,
+        size: 39,
+        color: Colors.green,
+      );
     } else if (section == "AD_UNIT") {
       if (value.contains("banner")) {
         return SvgPicture.asset('assets/images/banner.svg', width: 40);

@@ -16,14 +16,19 @@ class Utils {
     }
   }
 
-  static String? getAppStoreId(
+  static Map<String, String>? getAppStoreData(
       List<Map<String, dynamic>> appsList, String targetDisplayName) {
     for (final app in appsList) {
       final manualName = app['manualAppInfo']?['displayName'];
       final linkedName = app['linkedAppInfo']?['displayName'];
 
       if (manualName == targetDisplayName || linkedName == targetDisplayName) {
-        return app['linkedAppInfo']?['appStoreId'];
+        return {
+          'appId': app['linkedAppInfo'] != null
+              ? app['linkedAppInfo']['appStoreId']
+              : app['appApprovalState'],
+          'platform': app['platform'],
+        };
       }
     }
     return null; // if no match found
@@ -285,4 +290,19 @@ class Utils {
     'ZM': 'Zambia',
     'ZW': 'Zimbabwe',
   };
+
+  static bool isDataEmpty(dynamic data) {
+    if (data == null) return true;
+    if (data is List) {
+      if (data.isEmpty) return true;
+      return data.every((element) {
+        if (element == null) return true;
+        if (element is Map && element.isEmpty) return true;
+        return false;
+      });
+    }
+    if (data is Map && data.isEmpty) return true;
+    if (data is String && data.trim().isEmpty) return true;
+    return false;
+  }
 }

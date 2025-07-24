@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'firebase_options.dart';
 import 'utils/theme.dart';
@@ -15,6 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await MobileAds.instance.initialize();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -54,3 +56,13 @@ class AuthWrapper extends StatelessWidget {
         : const LoginScreen();
   }
 }
+
+/*
+currency feature
+initial date of admob earning
+past days trends
+graphs
+estimated earning in custom days (ML)
+open app on play store
+demo app
+*/

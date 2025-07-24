@@ -8,7 +8,7 @@ import '../../services/admob_service.dart';
 import '../../providers/apps_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard_screen.dart';
-import '../home/card_summary_screen.dart';
+import '../home/app_summary_screen.dart';
 
 class AppsScreen extends StatelessWidget {
   const AppsScreen({super.key});
@@ -59,7 +59,6 @@ class AppsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               itemCount: apps.length,
               itemBuilder: (context, index) {
-                final appId = apps[index]['linkedAppInfo']?['appStoreId'];
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: ListTile(
@@ -69,16 +68,23 @@ class AppsScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       CupertinoPageRoute(
-                        builder: (context) => CardSummaryScreen(
+                        builder: (context) => AppSummaryScreen(
                           section: 'APP',
                           appName: apps[index]['linkedAppInfo'] != null
                               ? apps[index]['linkedAppInfo']['displayName']
                               : apps[index]['manualAppInfo']['displayName'],
                           appId: apps[index]['appId'],
+                          customStartDate: DateTime.now(),
+                          customEndDate: DateTime.now(),
                         ),
                       ),
                     ),
-                    leading: AppIcon(appId: appId),
+                    leading: AppIcon(appData: {
+                      'appId': apps[index]['linkedAppInfo'] != null
+                          ? apps[index]['linkedAppInfo']['appStoreId']
+                          : apps[index]['appApprovalState'],
+                      'platform': apps[index]['platform'],
+                    }),
                     title: Text(
                       apps[index]['linkedAppInfo'] != null
                           ? apps[index]['linkedAppInfo']['displayName']
@@ -93,9 +99,12 @@ class AppsScreen extends StatelessWidget {
                           apps[index]['linkedAppInfo'] != null
                               ? apps[index]['linkedAppInfo']['appStoreId']
                               : apps[index]['appApprovalState'],
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
+                          style: TextStyle(
+                            fontSize:
+                                apps[index]['linkedAppInfo'] != null ? 14 : 12,
+                            color: apps[index]['linkedAppInfo'] != null
+                                ? Colors.grey
+                                : Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

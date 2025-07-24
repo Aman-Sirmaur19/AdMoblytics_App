@@ -5,20 +5,25 @@ import 'package:http/http.dart' as http;
 import '../providers/apps_provider.dart';
 
 class AppIcon extends StatelessWidget {
-  final String? appId;
+  final Map<String, String>? appData;
 
-  const AppIcon({super.key, required this.appId});
+  const AppIcon({super.key, required this.appData});
 
   @override
   Widget build(BuildContext context) {
     final appsProvider = Provider.of<AppsProvider>(context);
 
-    if (appId == null) {
-      return const Icon(Icons.apps_outage_rounded,
-          size: 40, color: Colors.grey);
+    if (appData?['appId'] == null || appData?['appId'] == 'ACTION_REQUIRED') {
+      return Icon(
+        appData?['platform'] == 'ANDROID'
+            ? Icons.android_rounded
+            : Icons.apple_rounded,
+        size: 39,
+        color: appData?['platform'] == 'ANDROID' ? Colors.green : Colors.grey,
+      );
     }
 
-    final cachedIcon = appsProvider.getAppIcon(appId!);
+    final cachedIcon = appsProvider.getAppIcon(appData!['appId']!);
     if (cachedIcon != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -27,22 +32,34 @@ class AppIcon extends StatelessWidget {
     }
 
     return FutureBuilder(
-      future: PlayStoreIconFetcher.fetchAppIconUrl(appId!),
+      future: PlayStoreIconFetcher.fetchAppIconUrl(appData!['appId']!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Icon(Icons.apps_outage_rounded,
-              size: 40, color: Colors.grey);
+          return Icon(
+            appData?['platform'] == 'ANDROID'
+                ? Icons.android_rounded
+                : Icons.apple_rounded,
+            size: 39,
+            color:
+                appData?['platform'] == 'ANDROID' ? Colors.green : Colors.grey,
+          );
         } else if (snapshot.hasData) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            appsProvider.setAppIcon(appId!, snapshot.data!);
+            appsProvider.setAppIcon(appData!['appId']!, snapshot.data!);
           });
           return ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.network(snapshot.data!, height: 40, width: 40),
           );
         } else {
-          return const Icon(Icons.apps_outage_rounded,
-              size: 40, color: Colors.grey);
+          return Icon(
+            appData?['platform'] == 'ANDROID'
+                ? Icons.android_rounded
+                : Icons.apple_rounded,
+            size: 39,
+            color:
+                appData?['platform'] == 'ANDROID' ? Colors.green : Colors.grey,
+          );
         }
       },
     );

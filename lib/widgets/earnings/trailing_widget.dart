@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 
 class TrailingWidget extends StatelessWidget {
   final String tabName;
-  final dynamic item;
+  final dynamic data;
+  final dynamic pastData;
 
-  const TrailingWidget({super.key, required this.tabName, required this.item});
+  const TrailingWidget({
+    super.key,
+    required this.tabName,
+    required this.data,
+    this.pastData,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final metrics = item['row']['metricValues'];
+    final metrics = data['row']['metricValues'];
     switch (tabName) {
       case 'Estimated Earnings':
         final micros = metrics['ESTIMATED_EARNINGS']?['microsValue'];

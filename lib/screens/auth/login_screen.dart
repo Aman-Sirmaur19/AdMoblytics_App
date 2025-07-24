@@ -39,7 +39,7 @@ class LoginScreen extends StatelessWidget {
                           width: 245,
                           height: 5,
                           decoration: BoxDecoration(
-                            color: const Color(0xff0f9d58),
+                            color: const Color(0xff34a853),
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
@@ -104,19 +104,20 @@ class LoginScreen extends StatelessWidget {
               ],
             ),
           ),
-          ElevatedButton(
+          OutlinedButton.icon(
             onPressed: authProvider.isLoading
                 ? null
                 : () async {
                     await authProvider.logout();
                     await authProvider.login();
                   },
-            style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue,
+            style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.blue,
+                side: const BorderSide(color: Colors.blue),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10))),
-            child: const Text('Sign in with Google'),
+            icon: Image.asset('assets/images/google.png', width: 20),
+            label: const Text('Sign in with Google'),
           ),
           const SizedBox(height: 50),
           const Text(

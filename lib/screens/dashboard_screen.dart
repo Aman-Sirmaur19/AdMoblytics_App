@@ -72,14 +72,16 @@ class DashboardScreen extends StatelessWidget {
                       text: 'AdMob',
                       style: const TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Fredoka',
                         color: Colors.lightBlue,
+                        fontWeight: FontWeight.bold,
                       ),
                       children: [
                         TextSpan(
                           text: 'lytics',
                           style: TextStyle(
                             fontSize: 18,
+                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.secondary,
                           ),
@@ -88,8 +90,9 @@ class DashboardScreen extends StatelessWidget {
                               text: ' Pro',
                               style: TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold,
                                 color: Colors.amber,
+                                fontFamily: 'Fredoka',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
