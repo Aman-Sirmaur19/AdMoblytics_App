@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/ad_manager.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_banner_ad.dart';
+import '../demo/tabs_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -104,6 +106,17 @@ class LoginScreen extends StatelessWidget {
               ],
             ),
           ),
+          OutlinedButton(
+            onPressed: () =>
+                AdManager().navigateWithAd(context, DemoTabsScreen()),
+            style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.green,
+                side: const BorderSide(color: Colors.green),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10))),
+            child: const Text('Try Demo App'),
+          ),
+          const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: authProvider.isLoading
                 ? null
