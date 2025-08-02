@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/ad_manager.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../services/admob_service.dart';
@@ -23,10 +24,8 @@ class AppsScreen extends StatelessWidget {
         title: const Text('Apps'),
         actions: [
           IconButton(
-            onPressed: () => Navigator.push(
-                context,
-                CupertinoPageRoute(
-                    builder: (context) => const DashboardScreen())),
+            onPressed: () =>
+                AdManager().navigateWithAd(context, const DashboardScreen()),
             tooltip: 'Dashboard',
             icon: const Icon(CupertinoIcons.square_grid_2x2),
           ),
@@ -65,10 +64,9 @@ class AppsScreen extends StatelessWidget {
                     tileColor: Theme.of(context).colorScheme.primaryContainer,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
-                    onTap: () => Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => AppSummaryScreen(
+                    onTap: () => AdManager().navigateWithAd(
+                        context,
+                        AppSummaryScreen(
                           section: 'APP',
                           appName: apps[index]['linkedAppInfo'] != null
                               ? apps[index]['linkedAppInfo']['displayName']
@@ -76,9 +74,7 @@ class AppsScreen extends StatelessWidget {
                           appId: apps[index]['appId'],
                           customStartDate: DateTime.now(),
                           customEndDate: DateTime.now(),
-                        ),
-                      ),
-                    ),
+                        )),
                     leading: AppIcon(appData: {
                       'appId': apps[index]['linkedAppInfo'] != null
                           ? apps[index]['linkedAppInfo']['appStoreId']
@@ -90,7 +86,10 @@ class AppsScreen extends StatelessWidget {
                           ? apps[index]['linkedAppInfo']['displayName']
                           : apps[index]['manualAppInfo']['displayName'],
                       style: const TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.bold),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,6 +105,7 @@ class AppsScreen extends StatelessWidget {
                                 ? Colors.grey
                                 : Colors.red,
                             fontWeight: FontWeight.bold,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(

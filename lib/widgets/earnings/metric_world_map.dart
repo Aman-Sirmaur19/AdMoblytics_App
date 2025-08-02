@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:countries_world_map/countries_world_map.dart';
 import 'package:countries_world_map/data/maps/world_map.dart';
-import 'package:flutter/material.dart';
 
 class MetricWorldMap extends StatelessWidget {
   final List<dynamic> data;
@@ -101,7 +101,7 @@ class MetricWorldMap extends StatelessWidget {
       defaultColor: Colors.grey,
       instructions: SMapWorld.instructionsMercator,
       countryBorder:
-          CountryBorder(color: Theme.of(context).colorScheme.background),
+          CountryBorder(color: Theme.of(context).colorScheme.surface),
       callback: (id, name, tapDetails) {
         final value = metricMap[id] ?? 0.0;
         final label = tabName.contains('Rate') || tabName == 'CTR'

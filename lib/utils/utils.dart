@@ -305,4 +305,24 @@ class Utils {
     if (data is String && data.trim().isEmpty) return true;
     return false;
   }
+
+  static List<Map<String, dynamic>> alignPastDataToCurrent({
+    required List currentData,
+    required List pastData,
+    required String section,
+  }) {
+    Map<String, Map<String, dynamic>> pastDataMap = {};
+
+    for (var item in pastData) {
+      final id = item['row']?['dimensionValues']?[section]?['value'];
+      if (id != null) {
+        pastDataMap[id] = item;
+      }
+    }
+
+    return currentData.map<Map<String, dynamic>>((item) {
+      final id = item['row']?['dimensionValues']?[section]?['value'];
+      return pastDataMap[id] ?? {};
+    }).toList();
+  }
 }

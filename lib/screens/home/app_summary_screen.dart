@@ -83,9 +83,8 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
     _customStartDate = tabIndex == 0
         ? _customStartDate ?? DateTime.now()
         : widget.customStartDate;
-    _customEndDate = tabIndex == 0
-        ? _customEndDate ?? DateTime.now()
-        : widget.customEndDate;
+    _customEndDate =
+        tabIndex == 0 ? _customEndDate ?? DateTime.now() : widget.customEndDate;
     final earningsGridRange = EarningsUtil.getDateRange(
       selectedTabIndex: tabIndex,
       customStartDate: _customStartDate,
@@ -345,7 +344,6 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
                                 });
                               },
                             ),
-                            const SizedBox(height: 5),
                             EarningsGrid(
                               data: data['earningsGrid'],
                               pastData: data['pastEarningsGrid'],

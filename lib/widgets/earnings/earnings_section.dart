@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/ad_manager.dart';
 import '../../utils/utils.dart';
 import '../../utils/earnings_util.dart';
 import '../../providers/apps_provider.dart';
@@ -12,6 +12,7 @@ import '../custom_tab_indicator.dart';
 import 'leading_icon.dart';
 import 'trailing_widget.dart';
 import 'metric_world_map.dart';
+import 'earnings_pie_chart.dart';
 
 class EarningsSection extends StatefulWidget {
   final String section;
@@ -36,6 +37,7 @@ class EarningsSection extends StatefulWidget {
 }
 
 class _EarningsSectionState extends State<EarningsSection> {
+  bool _showPieChart = false;
   bool _showMapView = false;
 
   @override
@@ -61,7 +63,6 @@ class _EarningsSectionState extends State<EarningsSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 widget.section == 'APP'
@@ -80,21 +81,36 @@ class _EarningsSectionState extends State<EarningsSection> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              if (widget.section == 'COUNTRY' && widget.data.length != 0)
+              const Spacer(),
+              if (widget.data.length != 0) ...[
+                if (widget.section == 'COUNTRY')
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _showMapView = !_showMapView;
+                      });
+                    },
+                    tooltip: _showMapView ? 'List view' : 'Map view',
+                    icon: Icon(_showMapView
+                        ? Icons.list_rounded
+                        : Icons.public_rounded),
+                  ),
                 IconButton(
                   onPressed: () {
                     setState(() {
-                      _showMapView = !_showMapView;
+                      _showPieChart = !_showPieChart;
                     });
                   },
-                  tooltip: _showMapView ? 'List view' : 'Map view',
-                  icon: Icon(
-                      _showMapView ? Icons.list_rounded : Icons.public_rounded),
+                  tooltip: _showPieChart ? 'List view' : 'Pie chart',
+                  icon: Icon(_showPieChart
+                      ? Icons.list_rounded
+                      : Icons.pie_chart_rounded),
                 ),
+              ],
             ],
           ),
           Container(
-            height: _showMapView
+            height: _showPieChart || _showMapView
                 ? isLandscape
                     ? 550
                     : 290
@@ -147,15 +163,14 @@ class _EarningsSectionState extends State<EarningsSection> {
                 ),
                 if (widget.data.length > 0 && !_showMapView)
                   TextButton(
-                    onPressed: () => Navigator.push(
+                    onPressed: () => AdManager().navigateWithAd(
                         context,
-                        CupertinoPageRoute(
-                            builder: (context) => SectionDetailsScreen(
-                                  section: widget.section,
-                                  appId: widget.appId,
-                                  customStartDate: widget.customStartDate,
-                                  customEndDate: widget.customEndDate,
-                                ))),
+                        SectionDetailsScreen(
+                          section: widget.section,
+                          appId: widget.appId,
+                          customStartDate: widget.customStartDate,
+                          customEndDate: widget.customEndDate,
+                        )),
                     child: const Text('View All'),
                   ),
               ],
@@ -174,108 +189,118 @@ class _EarningsSectionState extends State<EarningsSection> {
   }) {
     final appsProvider = Provider.of<AppsProvider>(context, listen: false);
     final apps = appsProvider.apps;
-    List sortedData = List.from(data);
-    List pastSortedData = List.from(pastData);
+    List sortedData = data is List ? List.from(data) : [];
     EarningsUtil.sortDataByTab(tabName, sortedData);
+    List pastSortedData = Utils.alignPastDataToCurrent(
+      currentData: sortedData,
+      pastData: pastData is List ? pastData : [],
+      section: widget.section,
+    );
     int size = sortedData.length <= 3 ? sortedData.length : 3;
     if (sortedData.isEmpty) {
       return const Center(child: Text('No any data to show'));
     }
-    return _showMapView
-        ? MetricWorldMap(
-            data: widget.data,
+    return _showPieChart
+        ? EarningsPieChart(
             tabName: tabName,
+            currentData: sortedData,
+            section: widget.section,
           )
-        : Column(
-            children: [
-              for (var index = 0; index < size; index++)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    horizontalTitleGap: 10,
-                    tileColor: Theme.of(context).colorScheme.primaryContainer,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    onTap: () {
-                      if (widget.section == 'APP') {
-                        final appData =
-                            sortedData[index]['row']['dimensionValues']['APP'];
-                        final appName = appData['displayLabel'];
-                        final appId = appData['value'];
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => AppSummaryScreen(
-                              section: widget.section,
-                              appName: appName,
-                              appId: appId,
-                              customStartDate: widget.customStartDate,
-                              customEndDate: widget.customEndDate,
-                            ),
+        : _showMapView
+            ? MetricWorldMap(
+                data: widget.data,
+                tabName: tabName,
+              )
+            : Column(
+                children: [
+                  for (var index = 0; index < size; index++)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+                      child: ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 10),
+                        horizontalTitleGap: 10,
+                        tileColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        onTap: () {
+                          if (widget.section == 'APP') {
+                            final appData = sortedData[index]['row']
+                                ['dimensionValues']['APP'];
+                            final appName = appData['displayLabel'];
+                            final appId = appData['value'];
+                            AdManager().navigateWithAd(
+                                context,
+                                AppSummaryScreen(
+                                  section: widget.section,
+                                  appName: appName,
+                                  appId: appId,
+                                  customStartDate: widget.customStartDate,
+                                  customEndDate: widget.customEndDate,
+                                ));
+                          }
+                        },
+                        leading: widget.section == 'APP'
+                            ? AppIcon(
+                                appData: Utils.getAppStoreData(
+                                    apps,
+                                    sortedData[index]['row']['dimensionValues']
+                                        [widget.section]['displayLabel']))
+                            : CircleAvatar(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                radius: 22,
+                                child: LeadingIcon(
+                                  section: widget.section,
+                                  value: sortedData[index]['row']
+                                          ['dimensionValues'][
+                                      widget.section == 'AD_UNIT'
+                                          ? 'FORMAT'
+                                          : widget.section]['value'],
+                                ),
+                              ),
+                        title: Text(
+                          widget.section == 'COUNTRY'
+                              ? (Utils.countryCodeToName[sortedData[index]
+                                          ['row']['dimensionValues']
+                                      [widget.section]['value']] ??
+                                  sortedData[index]['row']['dimensionValues']
+                                      [widget.section]['value'])
+                              : sortedData[index]['row']['dimensionValues']
+                                  [widget.section]['displayLabel'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      }
-                    },
-                    leading: widget.section == 'APP'
-                        ? AppIcon(
-                            appData: Utils.getAppStoreData(
-                                apps,
+                        ),
+                        subtitle: widget.section == 'AD_UNIT'
+                            ? Text(
                                 sortedData[index]['row']['dimensionValues']
-                                    [widget.section]['displayLabel']))
-                        : CircleAvatar(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.background,
-                            radius: 22,
-                            child: LeadingIcon(
-                              section: widget.section,
-                              value: sortedData[index]['row']['dimensionValues']
-                                  [widget.section == 'AD_UNIT'
-                                      ? 'FORMAT'
-                                      : widget.section]['value'],
-                            ),
+                                    ['FORMAT']['value'],
+                                style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold),
+                              )
+                            : null,
+                        trailing: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Theme.of(context).colorScheme.surface,
                           ),
-                    title: Text(
-                      widget.section == 'COUNTRY'
-                          ? (Utils.countryCodeToName[sortedData[index]['row']
-                                      ['dimensionValues'][widget.section]
-                                  ['value']] ??
-                              sortedData[index]['row']['dimensionValues']
-                                  [widget.section]['value'])
-                          : sortedData[index]['row']['dimensionValues']
-                              [widget.section]['displayLabel'],
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.bold,
+                          child: TrailingWidget(
+                            tabName: tabName,
+                            data: sortedData[index],
+                            pastData: pastSortedData[index],
+                          ),
+                        ),
                       ),
                     ),
-                    subtitle: widget.section == 'AD_UNIT'
-                        ? Text(
-                            sortedData[index]['row']['dimensionValues']
-                                ['FORMAT']['value'],
-                            style: const TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold),
-                          )
-                        : null,
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Theme.of(context).colorScheme.background,
-                      ),
-                      child: TrailingWidget(
-                        tabName: tabName,
-                        data: sortedData[index],
-                        // pastData: pastSortedData[index],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          );
+                ],
+              );
   }
 }

@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
 
-class EarningsGrid extends StatelessWidget {
+class EarningsGrid extends StatefulWidget {
   final dynamic data;
   final dynamic pastData;
 
   const EarningsGrid({super.key, required this.data, this.pastData});
 
   @override
+  State<EarningsGrid> createState() => _EarningsGridState();
+}
+
+class _EarningsGridState extends State<EarningsGrid> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 5),
         const Text(
           'Total',
           style: TextStyle(
@@ -20,6 +26,7 @@ class EarningsGrid extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+        SizedBox(height: 5),
         Container(
           width: double.infinity,
           height: 100,
@@ -29,7 +36,7 @@ class EarningsGrid extends StatelessWidget {
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: data.isEmpty
+          child: widget.data.isEmpty
               ? const Text('No any data to show')
               : GridView.builder(
                   scrollDirection: Axis.horizontal,
@@ -42,15 +49,16 @@ class EarningsGrid extends StatelessWidget {
                   itemBuilder: (context, index) {
                     switch (index) {
                       case 0:
-                        double value = double.parse(data[0]['row'] != null
-                                ? data[0]['row']['metricValues']
-                                    ['ESTIMATED_EARNINGS']['microsValue']
-                                : '0.0') /
+                        double value = double.parse(
+                                widget.data[0]['row'] != null
+                                    ? widget.data[0]['row']['metricValues']
+                                        ['ESTIMATED_EARNINGS']['microsValue']
+                                    : '0.0') /
                             1e6;
                         double pastValue = double.parse(
-                                !Utils.isDataEmpty(pastData) &&
-                                        pastData[0]['row'] != null
-                                    ? pastData[0]['row']['metricValues']
+                                !Utils.isDataEmpty(widget.pastData) &&
+                                        widget.pastData[0]['row'] != null
+                                    ? widget.pastData[0]['row']['metricValues']
                                         ['ESTIMATED_EARNINGS']['microsValue']
                                     : '0.0') /
                             1e6;
@@ -67,21 +75,22 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 1:
-                        double value = data[0]['row'] != null &&
-                                data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null &&
+                                widget.data[0]['row']['metricValues']
                                         ['IMPRESSION_RPM'] !=
                                     null
-                            ? data[0]['row']['metricValues']['IMPRESSION_RPM']
-                                ['doubleValue']
-                            : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null &&
-                                pastData[0]['row']['metricValues']
-                                        ['IMPRESSION_RPM'] !=
-                                    null
-                            ? pastData[0]['row']['metricValues']
+                            ? widget.data[0]['row']['metricValues']
                                 ['IMPRESSION_RPM']['doubleValue']
                             : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null &&
+                                    widget.pastData[0]['row']['metricValues']
+                                            ['IMPRESSION_RPM'] !=
+                                        null
+                                ? widget.pastData[0]['row']['metricValues']
+                                    ['IMPRESSION_RPM']['doubleValue']
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -95,15 +104,17 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 2:
-                        double value = data[0]['row'] != null
-                            ? double.parse(data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                 ['IMPRESSIONS']['integerValue'])
                             : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null
-                            ? double.parse(pastData[0]['row']['metricValues']
-                                ['IMPRESSIONS']['integerValue'])
-                            : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null
+                                ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['IMPRESSIONS']
+                                    ['integerValue'])
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -117,15 +128,17 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 3:
-                        double value = data[0]['row'] != null
-                            ? double.parse(data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                 ['AD_REQUESTS']['integerValue'])
                             : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null
-                            ? double.parse(pastData[0]['row']['metricValues']
-                                ['AD_REQUESTS']['integerValue'])
-                            : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null
+                                ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['AD_REQUESTS']
+                                    ['integerValue'])
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -139,15 +152,17 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 4:
-                        double value = data[0]['row'] != null
-                            ? double.parse(data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                 ['MATCHED_REQUESTS']['integerValue'])
                             : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null
-                            ? double.parse(pastData[0]['row']['metricValues']
-                                ['MATCHED_REQUESTS']['integerValue'])
-                            : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null
+                                ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['MATCHED_REQUESTS']
+                                    ['integerValue'])
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -161,24 +176,27 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 5:
-                        double value = data[0]['row'] != null &&
-                                data[0]['row']['metricValues']['MATCH_RATE'] !=
-                                    null
-                            ? double.parse(data[0]['row']['metricValues']
-                                        ['MATCH_RATE']['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null &&
-                                pastData[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null &&
+                                widget.data[0]['row']['metricValues']
                                         ['MATCH_RATE'] !=
                                     null
-                            ? double.parse(pastData[0]['row']['metricValues']
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                         ['MATCH_RATE']['doubleValue']
                                     .toString()) *
                                 100
                             : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null &&
+                                    widget.pastData[0]['row']['metricValues']
+                                            ['MATCH_RATE'] !=
+                                        null
+                                ? double.parse(widget.pastData[0]['row']
+                                            ['metricValues']['MATCH_RATE']
+                                            ['doubleValue']
+                                        .toString()) *
+                                    100
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -192,24 +210,27 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 6:
-                        double value = data[0]['row'] != null &&
-                                data[0]['row']['metricValues']['SHOW_RATE'] !=
-                                    null
-                            ? double.parse(data[0]['row']['metricValues']
-                                        ['SHOW_RATE']['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null &&
-                                pastData[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null &&
+                                widget.data[0]['row']['metricValues']
                                         ['SHOW_RATE'] !=
                                     null
-                            ? double.parse(pastData[0]['row']['metricValues']
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                         ['SHOW_RATE']['doubleValue']
                                     .toString()) *
                                 100
                             : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null &&
+                                    widget.pastData[0]['row']['metricValues']
+                                            ['SHOW_RATE'] !=
+                                        null
+                                ? double.parse(widget.pastData[0]['row']
+                                            ['metricValues']['SHOW_RATE']
+                                            ['doubleValue']
+                                        .toString()) *
+                                    100
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -223,15 +244,16 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 7:
-                        double value = data[0]['row'] != null
-                            ? double.parse(data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                 ['CLICKS']['integerValue'])
                             : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null
-                            ? double.parse(pastData[0]['row']['metricValues']
-                                ['CLICKS']['integerValue'])
-                            : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null
+                                ? double.parse(widget.pastData[0]['row']
+                                    ['metricValues']['CLICKS']['integerValue'])
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -245,23 +267,25 @@ class EarningsGrid extends StatelessWidget {
                           difference: difference,
                         );
                       case 8:
-                        double value = data[0]['row'] != null &&
-                                data[0]['row']['metricValues']
+                        double value = widget.data[0]['row'] != null &&
+                                widget.data[0]['row']['metricValues']
                                         ['IMPRESSION_CTR'] !=
                                     null
-                            ? double.parse(data[0]['row']['metricValues']
+                            ? double.parse(widget.data[0]['row']['metricValues']
                                     ['IMPRESSION_CTR']['doubleValue']
                                 .toString())
                             : 0;
-                        double pastValue = !Utils.isDataEmpty(pastData) &&
-                                pastData[0]['row'] != null &&
-                                pastData[0]['row']['metricValues']
-                                        ['IMPRESSION_CTR'] !=
-                                    null
-                            ? double.parse(pastData[0]['row']['metricValues']
-                                    ['IMPRESSION_CTR']['doubleValue']
-                                .toString())
-                            : 0;
+                        double pastValue =
+                            !Utils.isDataEmpty(widget.pastData) &&
+                                    widget.pastData[0]['row'] != null &&
+                                    widget.pastData[0]['row']['metricValues']
+                                            ['IMPRESSION_CTR'] !=
+                                        null
+                                ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['IMPRESSION_CTR']
+                                        ['doubleValue']
+                                    .toString())
+                                : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -318,7 +342,7 @@ class EarningsGrid extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (!Utils.isDataEmpty(pastData))
+          if (!Utils.isDataEmpty(widget.pastData))
             Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
@@ -330,11 +354,11 @@ class EarningsGrid extends StatelessWidget {
                         : Colors.green.withOpacity(.2),
               ),
               child: Text(
-                pastValueString,
+                '$pastValueString ${difference >= 0 ? '↑' : '↓'}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                   color: difference < 0
                       ? Colors.red
                       : difference == 0

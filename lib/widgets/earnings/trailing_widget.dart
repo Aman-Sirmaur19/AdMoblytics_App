@@ -14,66 +14,97 @@ class TrailingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final metrics = data['row']['metricValues'];
-    switch (tabName) {
+    final metrics = data['row']?['metricValues'] ?? {};
+    final pastMetrics =
+        pastData.isNotEmpty ? pastData['row']!['metricValues'] ?? {} : {};
+
+    double currentValue = _getValue(metrics, tabName);
+    double previousValue = _getValue(pastMetrics, tabName);
+
+    String formattedCurrent = _formatValue(currentValue, tabName);
+    String? change = _getChangePercentage(currentValue, previousValue);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          formattedCurrent,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+        if (change != null)
+          Text(
+            change,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: currentValue == previousValue
+                  ? Theme.of(context).brightness == Brightness.light
+                      ? Colors.amber.shade700
+                      : Colors.amber
+                  : currentValue > previousValue
+                      ? Colors.green
+                      : Colors.red,
+            ),
+          ),
+      ],
+    );
+  }
+
+  double _getValue(Map<dynamic, dynamic> metrics, String tab) {
+    switch (tab) {
       case 'Estimated Earnings':
         final micros = metrics['ESTIMATED_EARNINGS']?['microsValue'];
-        return Text(
-          '\$ ${micros != null ? (int.parse(micros) / 1000000).toStringAsFixed(4) : '0.0'}',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return micros != null ? int.parse(micros) / 1000000 : 0.0;
       case 'eCPM':
-        final rpm = metrics['IMPRESSION_RPM']?['doubleValue'];
-        return Text(
-          '\$ ${rpm != null ? rpm.toStringAsFixed(3) : '0.0'}',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return metrics['IMPRESSION_RPM']?['doubleValue'] ?? 0.0;
       case 'Impressions':
-        return Text(
-          metrics['IMPRESSIONS']?['integerValue'] ?? '0',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return double.tryParse(
+                metrics['IMPRESSIONS']?['integerValue'] ?? '0') ??
+            0.0;
       case 'Ad Requests':
-        return Text(
-          metrics['AD_REQUESTS']?['integerValue'] ?? '0',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return double.tryParse(
+                metrics['AD_REQUESTS']?['integerValue'] ?? '0') ??
+            0.0;
       case 'Matched Requests':
-        return Text(
-          metrics['MATCHED_REQUESTS']?['integerValue'] ?? '0',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return double.tryParse(
+                metrics['MATCHED_REQUESTS']?['integerValue'] ?? '0') ??
+            0.0;
       case 'Match Rate':
-        final matchRate = metrics['MATCH_RATE']?['doubleValue'];
-        return Text(
-          '${matchRate != null ? (matchRate * 100).toStringAsFixed(2) : '0'} %',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return ((metrics['MATCH_RATE']?['doubleValue'] ?? 0) as num)
+                .toDouble() *
+            100;
       case 'Show Rate':
-        final showRate = metrics['SHOW_RATE']?['doubleValue'];
-        return Text(
-          '${showRate != null ? (showRate * 100).toStringAsFixed(2) : '0'} %',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return ((metrics['SHOW_RATE']?['doubleValue'] ?? 0) as num).toDouble() *
+            100;
       case 'Clicks':
-        return Text(
-          metrics['CLICKS']?['integerValue'] ?? '0',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
-
+        return double.tryParse(metrics['CLICKS']?['integerValue'] ?? '0') ??
+            0.0;
       default: // 'CTR'
-        final ctr = metrics['IMPRESSION_CTR']?['doubleValue'];
-        return Text(
-          '${ctr != null ? ctr.toStringAsFixed(2) : '0'} %',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        );
+        return ((metrics['IMPRESSION_CTR']?['doubleValue'] ?? 0) as num)
+                .toDouble() *
+            100;
     }
+  }
+
+  String _formatValue(double value, String tab) {
+    switch (tab) {
+      case 'Estimated Earnings':
+      case 'eCPM':
+        return '\$ ${value.toStringAsFixed(4)}';
+      case 'Match Rate':
+      case 'Show Rate':
+      case 'CTR':
+        return '${value.toStringAsFixed(2)} %';
+      default:
+        return value.toStringAsFixed(0);
+    }
+  }
+
+  String? _getChangePercentage(double current, double past) {
+    if (past == 0 && current == 0) return null;
+    if (past == 0) return '↑ 100%';
+    double change = ((current - past) / past) * 100;
+    return '${change >= 0 ? '↑' : '↓'} ${change.abs().toStringAsFixed(1)}%';
   }
 }

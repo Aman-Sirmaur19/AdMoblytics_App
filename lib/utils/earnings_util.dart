@@ -104,15 +104,15 @@ class EarningsUtil {
   static void sortDataByTab(String tabName, List data) {
     data.sort((a, b) {
       if (a['row'] != null && b['row'] != null) {
-        final aValue = _getTrailingValue(a, tabName);
-        final bValue = _getTrailingValue(b, tabName);
+        final aValue = getTrailingValue(a, tabName);
+        final bValue = getTrailingValue(b, tabName);
         return bValue.compareTo(aValue); // Descending order
       }
       return 0;
     });
   }
 
-  static double _getTrailingValue(Map<String, dynamic> entry, String tabName) {
+  static double getTrailingValue(Map<String, dynamic> entry, String tabName) {
     final metrics = entry['row']['metricValues'];
     switch (tabName) {
       case 'Estimated Earnings':

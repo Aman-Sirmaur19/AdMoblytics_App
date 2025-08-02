@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/ad_manager.dart';
 import '../../providers/tab_provider.dart';
 import '../../widgets/custom_tab_indicator.dart';
 import '../dashboard_screen.dart';
@@ -57,10 +58,8 @@ class _TabsScreenState extends State<TabsScreen>
               title: const Text('AdMob Dashboard'),
               actions: [
                 IconButton(
-                  onPressed: () => Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                          builder: (context) => const DashboardScreen())),
+                  onPressed: () => AdManager()
+                      .navigateWithAd(context, const DashboardScreen()),
                   tooltip: 'Dashboard',
                   icon: const Icon(CupertinoIcons.square_grid_2x2),
                 ),

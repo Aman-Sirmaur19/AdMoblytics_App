@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../utils/utils.dart';
 import '../../utils/earnings_util.dart';
 import '../../utils/apps_earning_util.dart';
+import '../../services/ad_manager.dart';
 import '../../services/admob_service.dart';
 import '../../providers/tab_provider.dart';
 import '../../providers/apps_provider.dart';
@@ -90,7 +91,7 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
     });
   }
 
-  Future<dynamic> _loadReport(BuildContext context) async {
+  Future<Map<String, dynamic>> _loadReport(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
     final dimensionName = widget.section == 'AD_UNIT'
@@ -111,31 +112,56 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
       customStartDate: _customStartDate,
       customEndDate: _customEndDate,
     );
-    final startDate = dateRangeData["startDate"];
-    final endDate = dateRangeData["endDate"];
     final dimensions = dateRangeData["dimensions"];
     final sortConditions = dateRangeData["sortConditions"];
-    final report = await admobService.generateNetworkReport(
-      accessToken: authProvider.accessToken!,
-      accountId: authProvider.accountId!,
-      customBody: admobService.buildAdMobReportBody(
-        startDate: startDate,
-        endDate: endDate,
-        dimensions: dimensions,
-        sortConditions: sortConditions,
-        dimensionFilters: widget.appId != ''
-            ? [
-                {
-                  "dimension": "APP",
-                  "matchesAny": {
-                    "values": [widget.appId]
+    final reports = await Future.wait([
+      admobService.generateNetworkReport(
+        accessToken: authProvider.accessToken!,
+        accountId: authProvider.accountId!,
+        customBody: admobService.buildAdMobReportBody(
+          startDate: dateRangeData["startDate"],
+          endDate: dateRangeData["endDate"],
+          dimensions: dimensions,
+          sortConditions: sortConditions,
+          dimensionFilters: widget.appId != ''
+              ? [
+                  {
+                    "dimension": "APP",
+                    "matchesAny": {
+                      "values": [widget.appId]
+                    }
                   }
-                }
-              ]
-            : [],
+                ]
+              : [],
+        ),
       ),
-    );
-    return List.from(report).sublist(1, report.length - 1);
+      if (tabIndex != 8)
+        admobService.generateNetworkReport(
+          accessToken: authProvider.accessToken!,
+          accountId: authProvider.accountId!,
+          customBody: admobService.buildAdMobReportBody(
+            startDate: dateRangeData["pastStartDate"],
+            endDate: dateRangeData["pastEndDate"],
+            dimensions: dimensions,
+            sortConditions: sortConditions,
+            dimensionFilters: widget.appId != ''
+                ? [
+                    {
+                      "dimension": "APP",
+                      "matchesAny": {
+                        "values": [widget.appId]
+                      }
+                    }
+                  ]
+                : [],
+          ),
+        ),
+    ]);
+    return {
+      'present': List.from(reports[0]).sublist(1, reports[0].length - 1),
+      if (tabIndex != 8)
+        'past': List.from(reports[1]).sublist(1, reports[1].length - 1),
+    };
   }
 
   @override
@@ -266,7 +292,8 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                                             tabIndex:
                                                 tabProvider.selectedTabIndex,
                                             tabName: tabName,
-                                            data: data,
+                                            data: data['present'],
+                                            pastData: data['past'],
                                             context: context,
                                           ))
                                       .toList(),
@@ -287,12 +314,18 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
     required int tabIndex,
     required String tabName,
     required dynamic data,
+    required dynamic pastData,
     required BuildContext context,
   }) {
     final appsProvider = Provider.of<AppsProvider>(context, listen: false);
     final apps = appsProvider.apps;
     List sortedData = List.from(data);
     EarningsUtil.sortDataByTab(tabName, sortedData);
+    List pastSortedData = Utils.alignPastDataToCurrent(
+      currentData: sortedData,
+      pastData: pastData is List ? pastData : [],
+      section: widget.section,
+    );
     return ListView(
       padding: EdgeInsets.symmetric(
         horizontal: _showMapView ? 0 : 5,
@@ -347,20 +380,17 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 onTap: () => widget.section == 'APP'
-                    ? Navigator.push(
+                    ? AdManager().navigateWithAd(
                         context,
-                        CupertinoPageRoute(
-                            builder: (context) => AppSummaryScreen(
-                                  section: widget.section,
-                                  appName: sortedData[index]['row']
-                                          ['dimensionValues'][widget.section]
-                                      ['displayLabel'],
-                                  appId: sortedData[index]['row']
-                                          ['dimensionValues'][widget.section]
-                                      ['value'],
-                                  customStartDate: _customStartDate,
-                                  customEndDate: _customEndDate,
-                                )))
+                        AppSummaryScreen(
+                          section: widget.section,
+                          appName: sortedData[index]['row']['dimensionValues']
+                              [widget.section]['displayLabel'],
+                          appId: sortedData[index]['row']['dimensionValues']
+                              [widget.section]['value'],
+                          customStartDate: _customStartDate,
+                          customEndDate: _customEndDate,
+                        ))
                     : null,
                 leading: widget.section == 'APP'
                     ? AppIcon(
@@ -369,8 +399,7 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                             sortedData[index]['row']['dimensionValues']
                                 [widget.section]['displayLabel']))
                     : CircleAvatar(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.background,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         radius: 22,
                         child: LeadingIcon(
                           section: widget.section,
@@ -404,15 +433,16 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                       )
                     : null,
                 trailing: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                   child: TrailingWidget(
                     tabName: tabName,
                     data: sortedData[index],
+                    pastData: pastSortedData[index],
                   ),
                 ),
               ),

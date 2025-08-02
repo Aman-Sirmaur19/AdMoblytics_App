@@ -264,7 +264,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                   ),
-                  const SizedBox(height: 5),
                   EarningsGrid(
                     data: data['earningsGrid'],
                     pastData: data['pastEarningsGrid'],
