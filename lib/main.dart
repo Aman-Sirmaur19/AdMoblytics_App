@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import 'firebase_options.dart';
 import 'utils/theme.dart';
+import 'firebase_options.dart';
 import 'providers/tab_provider.dart';
 import 'providers/apps_provider.dart';
 import 'providers/auth_provider.dart';
@@ -60,9 +60,6 @@ class AuthWrapper extends StatelessWidget {
 /*
 currency feature
 initial date of admob earning
-past days trends
-graphs
+line graph
 estimated earning in custom days (ML)
-open app on play store
-demo app
 */
