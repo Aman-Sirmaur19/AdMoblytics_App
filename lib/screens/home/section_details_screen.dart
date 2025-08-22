@@ -17,6 +17,7 @@ import '../../widgets/custom_tab_indicator.dart';
 import '../../widgets/earnings/leading_icon.dart';
 import '../../widgets/earnings/trailing_widget.dart';
 import '../../widgets/earnings/metric_world_map.dart';
+import '../../widgets/earnings/earnings_pie_chart.dart';
 import '../../widgets/internet_connectivity_button.dart';
 import 'app_summary_screen.dart';
 
@@ -54,6 +55,7 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
   late TabController _tabController;
   late Future<dynamic> _future;
   bool _showMapView = false;
+  bool _showPieChart = false;
   DateTime? _customStartDate;
   DateTime? _customEndDate;
 
@@ -214,6 +216,17 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                   icon: Icon(
                       _showMapView ? Icons.list_rounded : Icons.public_rounded),
                 ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _showPieChart = !_showPieChart;
+                  });
+                },
+                tooltip: _showPieChart ? 'List view' : 'Pie chart',
+                icon: Icon(_showPieChart
+                    ? Icons.list_rounded
+                    : Icons.pie_chart_rounded),
+              ),
             ],
             bottom: TabBar(
               isScrollable: true,
@@ -319,7 +332,8 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
   }) {
     final appsProvider = Provider.of<AppsProvider>(context, listen: false);
     final apps = appsProvider.apps;
-    List sortedData = List.from(data);
+    // List sortedData = List.from(data);
+    List sortedData = data is List ? List.from(data) : [];
     EarningsUtil.sortDataByTab(tabName, sortedData);
     List pastSortedData = Utils.alignPastDataToCurrent(
       currentData: sortedData,
@@ -364,7 +378,16 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
             ),
           ],
         ),
-        if (_showMapView)
+        if (_showPieChart)
+          SizedBox(
+            height: 200,
+            child: EarningsPieChart(
+              tabName: tabName,
+              currentData: sortedData,
+              section: widget.section,
+            ),
+          )
+        else if (_showMapView)
           MetricWorldMap(
             data: data,
             tabName: tabName,

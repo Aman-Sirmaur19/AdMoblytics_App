@@ -1,13 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 import '../../services/ad_manager.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../demo/tabs_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    await InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+          _update();
+        }
+      });
+    }).catchError((error) {});
+  }
+
+  void _update() async {
+    await InAppUpdate.startFlexibleUpdate();
+    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((error) {});
+  }
 
   @override
   Widget build(BuildContext context) {

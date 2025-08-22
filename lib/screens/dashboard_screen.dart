@@ -35,7 +35,7 @@ class DashboardScreen extends StatelessWidget {
       body: Column(
         children: [
           const Text(
-            'Version: 1.0.2',
+            'Version: 1.0.3',
             textAlign: TextAlign.center,
             style: TextStyle(
               letterSpacing: 1.5,
