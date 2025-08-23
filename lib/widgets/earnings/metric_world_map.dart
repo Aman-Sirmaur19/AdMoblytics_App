@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:countries_world_map/countries_world_map.dart';
 import 'package:countries_world_map/data/maps/world_map.dart';
 
+import '../../utils/dialogs.dart';
+import '../../utils/utils.dart';
+
 class MetricWorldMap extends StatelessWidget {
   final List<dynamic> data;
   final String tabName;
@@ -103,13 +106,18 @@ class MetricWorldMap extends StatelessWidget {
       countryBorder:
           CountryBorder(color: Theme.of(context).colorScheme.surface),
       callback: (id, name, tapDetails) {
+        final country = Utils.countryCodeToName[id.toUpperCase()];
         final value = metricMap[id] ?? 0.0;
         final label = tabName.contains('Rate') || tabName == 'CTR'
             ? '${value.toStringAsFixed(2)} %'
-            : '\$${value.toStringAsFixed(4)}';
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$tabName ($id): $label')));
+            : tabName.contains('Earnings') || tabName == 'eCPM'
+                ? '\$${value.toStringAsFixed(4)}'
+                : value.toInt();
+        Dialogs.showSnackBar(
+            context,
+            country == null
+                ? "Oops! It's Ocean﹏𓊝﹏𓂁﹏"
+                : "Country: $country\n$tabName: $label");
       },
     );
   }

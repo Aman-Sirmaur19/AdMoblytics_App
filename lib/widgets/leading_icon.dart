@@ -17,27 +17,38 @@ class LeadingIcon extends StatelessWidget {
       );
     } else if (section == "AD_UNIT") {
       if (value.contains("banner")) {
-        return SvgPicture.asset('assets/images/banner.svg', width: 40);
+        return _iconContainer("banner", context);
       } else if (value.contains("interstitial")) {
-        return SvgPicture.asset('assets/images/interstitial.svg', width: 40);
+        return _iconContainer("interstitial", context);
       } else if (value.contains("native")) {
-        return SvgPicture.asset('assets/images/native.svg', width: 40);
+        return _iconContainer("native", context);
       } else if (value.contains("rewarded")) {
-        return SvgPicture.asset('assets/images/rewarded.svg', width: 40);
+        return _iconContainer("rewarded", context);
       } else if (value.contains("app")) {
-        return SvgPicture.asset('assets/images/app-open.svg', width: 40);
+        return _iconContainer("app-open", context);
       } else if (value.contains("rewarded-interstitial")) {
-        return SvgPicture.asset('assets/images/rewarded-interstitial.svg',
-            width: 40);
+        return _iconContainer("rewarded-interstitial", context);
       } else {
         return const Icon(Icons.ad_units_rounded, color: Colors.orange);
       }
     } else if (section == "COUNTRY") {
       return Image.network(
-        "https://flagcdn.com/w320/${value.toLowerCase()}.png",
-        width: 30,
+        // "https://flagcdn.com/w320/${value.toLowerCase()}.png",
+        "https://flagcdn.com/128x96/${value.toLowerCase()}.png",
+        width: 35,
       );
     }
     return const Icon(Icons.help_outline, color: Colors.grey);
+  }
+
+  Widget _iconContainer(String label, BuildContext context) {
+    return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).colorScheme.surface,
+        ),
+        child: SvgPicture.asset('assets/images/$label.svg'));
   }
 }

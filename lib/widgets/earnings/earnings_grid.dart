@@ -13,8 +13,11 @@ class EarningsGrid extends StatefulWidget {
 }
 
 class _EarningsGridState extends State<EarningsGrid> {
+  bool _isPastDataEmpty = false;
+
   @override
   Widget build(BuildContext context) {
+    _isPastDataEmpty = Utils.isDataEmpty(widget.pastData);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -55,12 +58,11 @@ class _EarningsGridState extends State<EarningsGrid> {
                                         ['ESTIMATED_EARNINGS']['microsValue']
                                     : '0.0') /
                             1e6;
-                        double pastValue = double.parse(
-                                !Utils.isDataEmpty(widget.pastData) &&
-                                        widget.pastData[0]['row'] != null
-                                    ? widget.pastData[0]['row']['metricValues']
-                                        ['ESTIMATED_EARNINGS']['microsValue']
-                                    : '0.0') /
+                        double pastValue = double.parse(!_isPastDataEmpty &&
+                                    widget.pastData[0]['row'] != null
+                                ? widget.pastData[0]['row']['metricValues']
+                                    ['ESTIMATED_EARNINGS']['microsValue']
+                                : '0.0') /
                             1e6;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
@@ -82,15 +84,14 @@ class _EarningsGridState extends State<EarningsGrid> {
                             ? widget.data[0]['row']['metricValues']
                                 ['IMPRESSION_RPM']['doubleValue']
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null &&
-                                    widget.pastData[0]['row']['metricValues']
-                                            ['IMPRESSION_RPM'] !=
-                                        null
-                                ? widget.pastData[0]['row']['metricValues']
-                                    ['IMPRESSION_RPM']['doubleValue']
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null &&
+                                widget.pastData[0]['row']['metricValues']
+                                        ['IMPRESSION_RPM'] !=
+                                    null
+                            ? widget.pastData[0]['row']['metricValues']
+                                ['IMPRESSION_RPM']['doubleValue']
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -108,13 +109,11 @@ class _EarningsGridState extends State<EarningsGrid> {
                             ? double.parse(widget.data[0]['row']['metricValues']
                                 ['IMPRESSIONS']['integerValue'])
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null
-                                ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['IMPRESSIONS']
-                                    ['integerValue'])
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null
+                            ? double.parse(widget.pastData[0]['row']
+                                ['metricValues']['IMPRESSIONS']['integerValue'])
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -132,13 +131,11 @@ class _EarningsGridState extends State<EarningsGrid> {
                             ? double.parse(widget.data[0]['row']['metricValues']
                                 ['AD_REQUESTS']['integerValue'])
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null
-                                ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['AD_REQUESTS']
-                                    ['integerValue'])
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null
+                            ? double.parse(widget.pastData[0]['row']
+                                ['metricValues']['AD_REQUESTS']['integerValue'])
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -156,13 +153,12 @@ class _EarningsGridState extends State<EarningsGrid> {
                             ? double.parse(widget.data[0]['row']['metricValues']
                                 ['MATCHED_REQUESTS']['integerValue'])
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null
-                                ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['MATCHED_REQUESTS']
-                                    ['integerValue'])
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null
+                            ? double.parse(widget.pastData[0]['row']
+                                    ['metricValues']['MATCHED_REQUESTS']
+                                ['integerValue'])
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -185,18 +181,17 @@ class _EarningsGridState extends State<EarningsGrid> {
                                     .toString()) *
                                 100
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null &&
-                                    widget.pastData[0]['row']['metricValues']
-                                            ['MATCH_RATE'] !=
-                                        null
-                                ? double.parse(widget.pastData[0]['row']
-                                            ['metricValues']['MATCH_RATE']
-                                            ['doubleValue']
-                                        .toString()) *
-                                    100
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null &&
+                                widget.pastData[0]['row']['metricValues']
+                                        ['MATCH_RATE'] !=
+                                    null
+                            ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['MATCH_RATE']
+                                        ['doubleValue']
+                                    .toString()) *
+                                100
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -219,18 +214,17 @@ class _EarningsGridState extends State<EarningsGrid> {
                                     .toString()) *
                                 100
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null &&
-                                    widget.pastData[0]['row']['metricValues']
-                                            ['SHOW_RATE'] !=
-                                        null
-                                ? double.parse(widget.pastData[0]['row']
-                                            ['metricValues']['SHOW_RATE']
-                                            ['doubleValue']
-                                        .toString()) *
-                                    100
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null &&
+                                widget.pastData[0]['row']['metricValues']
+                                        ['SHOW_RATE'] !=
+                                    null
+                            ? double.parse(widget.pastData[0]['row']
+                                        ['metricValues']['SHOW_RATE']
+                                        ['doubleValue']
+                                    .toString()) *
+                                100
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -248,12 +242,11 @@ class _EarningsGridState extends State<EarningsGrid> {
                             ? double.parse(widget.data[0]['row']['metricValues']
                                 ['CLICKS']['integerValue'])
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null
-                                ? double.parse(widget.pastData[0]['row']
-                                    ['metricValues']['CLICKS']['integerValue'])
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null
+                            ? double.parse(widget.pastData[0]['row']
+                                ['metricValues']['CLICKS']['integerValue'])
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -275,17 +268,16 @@ class _EarningsGridState extends State<EarningsGrid> {
                                     ['IMPRESSION_CTR']['doubleValue']
                                 .toString())
                             : 0;
-                        double pastValue =
-                            !Utils.isDataEmpty(widget.pastData) &&
-                                    widget.pastData[0]['row'] != null &&
-                                    widget.pastData[0]['row']['metricValues']
-                                            ['IMPRESSION_CTR'] !=
-                                        null
-                                ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['IMPRESSION_CTR']
-                                        ['doubleValue']
-                                    .toString())
-                                : 0;
+                        double pastValue = !_isPastDataEmpty &&
+                                widget.pastData[0]['row'] != null &&
+                                widget.pastData[0]['row']['metricValues']
+                                        ['IMPRESSION_CTR'] !=
+                                    null
+                            ? double.parse(widget.pastData[0]['row']
+                                    ['metricValues']['IMPRESSION_CTR']
+                                    ['doubleValue']
+                                .toString())
+                            : 0;
                         double difference = value - pastValue;
                         String percent = pastValue == 0
                             ? '0.0'
@@ -326,6 +318,7 @@ class _EarningsGridState extends State<EarningsGrid> {
         children: [
           Container(
             width: double.infinity,
+            margin: EdgeInsets.only(bottom: _isPastDataEmpty ? 0 : 4),
             padding: const EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: Colors.blue,
@@ -344,6 +337,7 @@ class _EarningsGridState extends State<EarningsGrid> {
               ),
             ),
           ),
+          if (_isPastDataEmpty) Spacer(),
           Text(
             value,
             textAlign: TextAlign.center,
@@ -353,7 +347,8 @@ class _EarningsGridState extends State<EarningsGrid> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (!Utils.isDataEmpty(widget.pastData))
+          if (_isPastDataEmpty) Spacer(),
+          if (!_isPastDataEmpty)
             Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(

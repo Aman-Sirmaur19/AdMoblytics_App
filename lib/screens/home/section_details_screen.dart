@@ -14,7 +14,7 @@ import '../../widgets/app_icon.dart';
 import '../../widgets/custom_date.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/custom_tab_indicator.dart';
-import '../../widgets/earnings/leading_icon.dart';
+import '../../widgets/leading_icon.dart';
 import '../../widgets/earnings/trailing_widget.dart';
 import '../../widgets/earnings/metric_world_map.dart';
 import '../../widgets/earnings/earnings_pie_chart.dart';
@@ -421,9 +421,8 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                             apps,
                             sortedData[index]['row']['dimensionValues']
                                 [widget.section]['displayLabel']))
-                    : CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        radius: 22,
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
                         child: LeadingIcon(
                           section: widget.section,
                           value: sortedData[index]['row']['dimensionValues'][

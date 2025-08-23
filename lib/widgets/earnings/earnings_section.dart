@@ -8,8 +8,8 @@ import '../../providers/apps_provider.dart';
 import '../../screens/home/app_summary_screen.dart';
 import '../../screens/home/section_details_screen.dart';
 import '../app_icon.dart';
+import '../leading_icon.dart';
 import '../custom_tab_indicator.dart';
-import 'leading_icon.dart';
 import 'trailing_widget.dart';
 import 'metric_world_map.dart';
 import 'earnings_pie_chart.dart';
@@ -247,10 +247,8 @@ class _EarningsSectionState extends State<EarningsSection> {
                                     apps,
                                     sortedData[index]['row']['dimensionValues']
                                         [widget.section]['displayLabel']))
-                            : CircleAvatar(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.surface,
-                                radius: 22,
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(5),
                                 child: LeadingIcon(
                                   section: widget.section,
                                   value: sortedData[index]['row']

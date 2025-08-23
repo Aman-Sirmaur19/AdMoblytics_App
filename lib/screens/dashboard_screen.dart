@@ -35,7 +35,7 @@ class DashboardScreen extends StatelessWidget {
       body: Column(
         children: [
           const Text(
-            'Version: 1.0.3',
+            'Version: 1.0.4',
             textAlign: TextAlign.center,
             style: TextStyle(
               letterSpacing: 1.5,
@@ -79,21 +79,40 @@ class DashboardScreen extends StatelessWidget {
                       const Icon(Icons.star_rate_rounded, color: Colors.amber),
                   title: RichText(
                     text: TextSpan(
-                      text: 'AdMob',
+                      text: 'Ad',
                       style: const TextStyle(
                         fontSize: 18,
+                        color: Colors.red,
+                        letterSpacing: 0.5,
                         fontFamily: 'Fredoka',
-                        color: Colors.lightBlue,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                       children: [
+                        TextSpan(
+                          text: 'M',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.amber,
+                            fontFamily: 'Fredoka',
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'ob',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontFamily: 'Fredoka',
+                            color: Colors.lightBlue,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         TextSpan(
                           text: 'lytics',
                           style: TextStyle(
                             fontSize: 18,
+                            color: Colors.green,
                             fontFamily: 'Fredoka',
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.w800,
                           ),
                           children: const [
                             TextSpan(

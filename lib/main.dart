@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'utils/theme.dart';
 import 'firebase_options.dart';
+import 'services/ad_manager.dart';
 import 'providers/tab_provider.dart';
 import 'providers/apps_provider.dart';
 import 'providers/auth_provider.dart';
@@ -16,7 +17,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await MobileAds.instance.initialize();
+  _initializeMobileAds();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -25,6 +26,11 @@ Future<void> main() async {
     ],
     child: const MyApp(),
   ));
+}
+
+Future<void> _initializeMobileAds() async {
+  await MobileAds.instance.initialize();
+  AdManager().initialize();
 }
 
 class MyApp extends StatelessWidget {

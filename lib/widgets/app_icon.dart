@@ -26,13 +26,13 @@ class AppIcon extends StatelessWidget {
     final cachedIcon = appsProvider.getAppIcon(appData!['appId']!);
     if (cachedIcon != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         child: Image.network(cachedIcon, height: 40, width: 40),
       );
     }
 
     return FutureBuilder(
-      future: PlayStoreIconFetcher.fetchAppIconUrl(appData!['appId']!),
+      future: StoreIconFetcher.fetchAppIconUrl(appData!['appId']!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Icon(
@@ -48,7 +48,7 @@ class AppIcon extends StatelessWidget {
             appsProvider.setAppIcon(appData!['appId']!, snapshot.data!);
           });
           return ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             child: Image.network(snapshot.data!, height: 40, width: 40),
           );
         } else {
@@ -66,22 +66,39 @@ class AppIcon extends StatelessWidget {
   }
 }
 
-class PlayStoreIconFetcher {
-  /// Fetch the app metadata (including icon URL) from Play Store using the app ID
+class StoreIconFetcher {
   static Future<String?> fetchAppIconUrl(String appId) async {
-    final url =
-        Uri.parse('https://play.google.com/store/apps/details?id=$appId');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final htmlContent = response.body;
-      final iconRegex = RegExp(
-          r'<img.*?src="(https://play-lh.googleusercontent.com/[^"]*)"',
-          multiLine: true);
-      final match = iconRegex.firstMatch(htmlContent);
-      if (match != null) {
-        return match.group(1); // Return the first match (icon URL)
+    if (appId.contains("com")) {
+      final url =
+          Uri.parse('https://play.google.com/store/apps/details?id=$appId');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final htmlContent = response.body;
+        final iconRegex = RegExp(
+          r'<img.*?src="(https://play-lh\.googleusercontent\.com/[^"]*)"',
+          multiLine: true,
+        );
+        final match = iconRegex.firstMatch(htmlContent);
+        if (match != null) {
+          return match.group(1);
+        }
+      }
+    } else {
+      final url = Uri.parse('https://apps.apple.com/app/id$appId');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final htmlContent = response.body;
+        // Apple stores icons in "og:image" meta tag
+        final iconRegex = RegExp(
+          r'<meta property="og:image" content="([^"]+)"',
+          multiLine: true,
+        );
+        final match = iconRegex.firstMatch(htmlContent);
+        if (match != null) {
+          return match.group(1); // App Store icon URL
+        }
       }
     }
-    return null; // Fallback if no icon is found
+    return null; // Fallback if not found
   }
 }

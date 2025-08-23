@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/ad_manager.dart';
+import '../../utils/dialogs.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../services/admob_service.dart';
@@ -14,11 +16,33 @@ import '../home/app_summary_screen.dart';
 class AppsScreen extends StatelessWidget {
   const AppsScreen({super.key});
 
+  Future<void> _launchInBrowser(BuildContext context, Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // Dialogs.showErrorSnackBar(context, 'Could not launch $url');
+    }
+  }
+
+  Uri? _getStoreUrl(Map<String, dynamic> app) {
+    String appStoreId = '';
+    if (app['linkedAppInfo'] != null &&
+        app['linkedAppInfo']['appStoreId'] != null) {
+      appStoreId = app['linkedAppInfo']['appStoreId'];
+      if (app['platform'] == 'ANDROID') {
+        return Uri.parse(
+            "https://play.google.com/store/apps/details?id=$appStoreId");
+      } else if (app['platform'] == 'IOS') {
+        return Uri.parse("https://apps.apple.com/app/id$appStoreId");
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
     final appsProvider = Provider.of<AppsProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Apps'),
@@ -58,9 +82,13 @@ class AppsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               itemCount: apps.length,
               itemBuilder: (context, index) {
+                final app = apps[index];
+                final storeUrl = _getStoreUrl(app);
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: ListTile(
+                    contentPadding: EdgeInsets.only(left: 10, right: 5),
                     tileColor: Theme.of(context).colorScheme.primaryContainer,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -68,23 +96,23 @@ class AppsScreen extends StatelessWidget {
                         context,
                         AppSummaryScreen(
                           section: 'APP',
-                          appName: apps[index]['linkedAppInfo'] != null
-                              ? apps[index]['linkedAppInfo']['displayName']
-                              : apps[index]['manualAppInfo']['displayName'],
-                          appId: apps[index]['appId'],
+                          appName: app['linkedAppInfo'] != null
+                              ? app['linkedAppInfo']['displayName']
+                              : app['manualAppInfo']['displayName'],
+                          appId: app['appId'],
                           customStartDate: DateTime.now(),
                           customEndDate: DateTime.now(),
                         )),
                     leading: AppIcon(appData: {
-                      'appId': apps[index]['linkedAppInfo'] != null
-                          ? apps[index]['linkedAppInfo']['appStoreId']
-                          : apps[index]['appApprovalState'],
-                      'platform': apps[index]['platform'],
+                      'appId': app['linkedAppInfo'] != null
+                          ? app['linkedAppInfo']['appStoreId']
+                          : app['appApprovalState'],
+                      'platform': app['platform'],
                     }),
                     title: Text(
-                      apps[index]['linkedAppInfo'] != null
-                          ? apps[index]['linkedAppInfo']['displayName']
-                          : apps[index]['manualAppInfo']['displayName'],
+                      app['linkedAppInfo'] != null
+                          ? app['linkedAppInfo']['displayName']
+                          : app['manualAppInfo']['displayName'],
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -95,13 +123,12 @@ class AppsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          apps[index]['linkedAppInfo'] != null
-                              ? apps[index]['linkedAppInfo']['appStoreId']
-                              : apps[index]['appApprovalState'],
+                          app['linkedAppInfo'] != null
+                              ? app['linkedAppInfo']['appStoreId']
+                              : app['appApprovalState'],
                           style: TextStyle(
-                            fontSize:
-                                apps[index]['linkedAppInfo'] != null ? 14 : 12,
-                            color: apps[index]['linkedAppInfo'] != null
+                            fontSize: app['linkedAppInfo'] != null ? 14 : 12,
+                            color: app['linkedAppInfo'] != null
                                 ? Colors.grey
                                 : Colors.red,
                             fontWeight: FontWeight.bold,
@@ -109,7 +136,7 @@ class AppsScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          apps[index]['platform'],
+                          app['platform'],
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.blueGrey,
@@ -117,6 +144,22 @@ class AppsScreen extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        if (storeUrl != null) {
+                          _launchInBrowser(context, storeUrl);
+                        } else {
+                          Dialogs.showErrorSnackBar(
+                              context, 'App not yet published!');
+                        }
+                      },
+                      tooltip: 'Visit Store',
+                      icon: const Icon(
+                        CupertinoIcons.link,
+                        size: 20,
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
                 );
