@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:currency_picker/currency_picker.dart';
 
-import '../../services/ad_manager.dart';
 import '../../services/admob_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/account_provider.dart';
+import '../../providers/currency_provider.dart';
+import '../../providers/navigation_provider.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/internet_connectivity_button.dart';
 import '../dashboard_screen.dart';
@@ -17,7 +20,9 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  late Future<dynamic> _accountFuture;
+  // REMOVED: No longer need a local future
+  // late Future<dynamic> _accountFuture;
+
   late AuthProvider authProvider;
   late AdMobService admobService;
 
@@ -26,25 +31,38 @@ class _AccountScreenState extends State<AccountScreen> {
     super.initState();
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     admobService = AdMobService(authProvider.accessToken!);
-    _accountFuture = admobService.fetchAccountDetails();
+
+    // MODIFIED: Fetch data via the provider only if needed
+    // Use context.read inside initState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AccountProvider>().fetchAccountIfNeeded(admobService);
+    });
   }
 
+  // MODIFIED: Refresh method now calls the provider's refresh function
   Future<void> _refreshAccount() async {
-    setState(() {
-      _accountFuture = admobService.fetchAccountDetails();
-    });
-    await _accountFuture;
+    await context.read<AccountProvider>().refreshAccount(admobService);
   }
 
   @override
   Widget build(BuildContext context) {
+    // ADDED: Use a Consumer to listen to the AccountProvider's state
+    final accountProvider = context.watch<AccountProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Account'),
         actions: [
           IconButton(
-            onPressed: () =>
-                AdManager().navigateWithAd(context, const DashboardScreen()),
+            onPressed: () {
+              context.read<NavigationProvider>().increment();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => const DashboardScreen(),
+                ),
+              );
+            },
             tooltip: 'Dashboard',
             icon: const Icon(CupertinoIcons.square_grid_2x2),
           ),
@@ -55,97 +73,123 @@ class _AccountScreenState extends State<AccountScreen> {
         onRefresh: _refreshAccount,
         color: Colors.blue,
         backgroundColor: Colors.blue.shade50,
-        child: FutureBuilder(
-          future: _accountFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                  child: CircularProgressIndicator(color: Colors.blue));
-            } else if (snapshot.hasError) {
-              return InternetConnectivityButton(onPressed: _refreshAccount);
-            }
-            final data = snapshot.data as Map<String, dynamic>;
-            final account = data['account']?[0];
-            final accountId = account['publisherId'] ?? 'Unknown';
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _customRow(
-                      icon: Icons.info_outline_rounded,
-                      label: 'User Information',
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.network(
-                          authProvider.user!.photoUrl!,
-                          height: 60,
-                          width: 60,
-                        )),
-                    const SizedBox(height: 10),
-                    _customContainer(
-                      icon: const Icon(
-                        Icons.edit_attributes_outlined,
-                        color: Colors.orange,
-                      ),
-                      label: 'Name',
-                      value: authProvider.user!.displayName!,
-                    ),
-                    const SizedBox(height: 10),
-                    _customContainer(
-                      icon: const Icon(
-                        Icons.public_rounded,
-                        color: Colors.blue,
-                      ),
-                      label: 'Publisher ID',
-                      value: accountId,
-                    ),
-                    const SizedBox(height: 10),
-                    _customContainer(
-                      icon: const Icon(
-                        Icons.attach_money_rounded,
-                        color: Colors.amber,
-                      ),
-                      label: 'Currency',
-                      value: account['currencyCode'],
-                    ),
-                    const SizedBox(height: 10),
-                    _customContainer(
-                      icon: const Icon(
-                        Icons.access_time_rounded,
-                        color: Colors.green,
-                      ),
-                      label: 'Timezone',
-                      value: account['reportingTimeZone'],
-                    ),
-                    const SizedBox(height: 50),
-                    _customRow(
-                      icon: Icons.account_circle_outlined,
-                      label: 'Account',
-                    ),
-                    const SizedBox(height: 10),
-                    ListTile(
-                      tileColor: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      onTap: () async {
-                        await authProvider.logout();
-                      },
-                      leading: const Icon(
-                        Icons.logout_rounded,
-                        color: Colors.red,
-                      ),
-                      title: const Text('Logout'),
-                    ),
-                  ],
-                ),
+        // MODIFIED: Replaced FutureBuilder with a direct check on the provider's state
+        child: _buildBody(accountProvider),
+      ),
+    );
+  }
+
+  // ADDED: A new helper method to build the body based on provider state
+  Widget _buildBody(AccountProvider accountProvider) {
+    if (accountProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Colors.blue));
+    }
+
+    if (accountProvider.hasError) {
+      return InternetConnectivityButton(onPressed: _refreshAccount);
+    }
+
+    if (accountProvider.accountDetails == null) {
+      // This can happen if there's no data and it's not loading (e.g., initial state)
+      return const Center(child: Text("No account details found."));
+    }
+
+    // Data is available, build the UI
+    final data = accountProvider.accountDetails!;
+    final account = data['account']?[0];
+    final accountId = account['publisherId'] ?? 'Unknown';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _customRow(
+              icon: Icons.info_outline_rounded,
+              label: 'User Information',
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Image.network(
+                  authProvider.user!.photoUrl!,
+                  height: 60,
+                  width: 60,
+                )),
+            const SizedBox(height: 10),
+            _customContainer(
+              icon: const Icon(
+                Icons.edit_attributes_outlined,
+                color: Colors.orange,
               ),
-            );
-          },
+              label: 'Name',
+              value: authProvider.user!.displayName!,
+            ),
+            const SizedBox(height: 10),
+            _customContainer(
+              icon: const Icon(
+                Icons.public_rounded,
+                color: Colors.blue,
+              ),
+              label: 'Publisher ID',
+              value: accountId,
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                showCurrencyPicker(
+                  context: context,
+                  showFlag: true,
+                  showCurrencyName: true,
+                  showCurrencyCode: true,
+                  onSelect: (Currency currency) {
+                    context
+                        .read<CurrencyProvider>()
+                        .setCurrency(currency.code, currency.symbol);
+                  },
+                );
+              },
+              child: _customContainer(
+                icon: const Icon(
+                  Icons.attach_money_rounded,
+                  color: Colors.amber,
+                ),
+                label: 'Currency',
+                value:
+                    '${context.watch<CurrencyProvider>().currencyCode} (${context.watch<CurrencyProvider>().currencySymbol}) ▼',
+              ),
+            ),
+            SizedBox(height: 10),
+            _customContainer(
+              icon: const Icon(
+                Icons.access_time_rounded,
+                color: Colors.green,
+              ),
+              label: 'Timezone',
+              value: account['reportingTimeZone'],
+            ),
+            const SizedBox(height: 50),
+            _customRow(
+              icon: Icons.account_circle_outlined,
+              label: 'Account',
+            ),
+            const SizedBox(height: 10),
+            ListTile(
+              tileColor: Theme.of(context).colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              onTap: () async {
+                await authProvider.logout();
+              },
+              leading: const Icon(
+                Icons.logout_rounded,
+                color: Colors.red,
+              ),
+              title: const Text('Logout'),
+            ),
+          ],
         ),
       ),
     );
