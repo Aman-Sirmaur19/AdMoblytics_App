@@ -13,7 +13,8 @@ class AppIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final appsProvider = Provider.of<AppsProvider>(context);
 
-    if (appData?['appId'] == null || appData?['appId'] == 'ACTION_REQUIRED') {
+    if (appData?['appStoreId'] == null ||
+        appData?['appStoreId'] == 'ACTION_REQUIRED') {
       return Icon(
         appData?['platform'] == 'ANDROID'
             ? Icons.android_rounded
@@ -32,7 +33,7 @@ class AppIcon extends StatelessWidget {
     }
 
     return FutureBuilder(
-      future: StoreIconFetcher.fetchAppIconUrl(appData!['appId']!),
+      future: StoreIconFetcher.fetchAppIconUrl(appData!['appStoreId']!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Icon(
@@ -45,7 +46,11 @@ class AppIcon extends StatelessWidget {
           );
         } else if (snapshot.hasData) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            appsProvider.setAppIcon(appData!['appId']!, snapshot.data!);
+            appsProvider.setAppIcon(
+              appData!['appId']!,
+              appData!['appStoreId']!,
+              snapshot.data!,
+            );
           });
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -67,10 +72,10 @@ class AppIcon extends StatelessWidget {
 }
 
 class StoreIconFetcher {
-  static Future<String?> fetchAppIconUrl(String appId) async {
-    if (appId.contains("com")) {
-      final url =
-          Uri.parse('https://play.google.com/store/apps/details?id=$appId');
+  static Future<String?> fetchAppIconUrl(String appStoreId) async {
+    if (appStoreId.contains("com")) {
+      final url = Uri.parse(
+          'https://play.google.com/store/apps/details?id=$appStoreId');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final htmlContent = response.body;
@@ -84,7 +89,7 @@ class StoreIconFetcher {
         }
       }
     } else {
-      final url = Uri.parse('https://apps.apple.com/app/id$appId');
+      final url = Uri.parse('https://apps.apple.com/app/id$appStoreId');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final htmlContent = response.body;

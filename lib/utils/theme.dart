@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData lightMode = ThemeData(
   brightness: Brightness.light,
-  fontFamily: 'Fredoka',
+  fontFamily: 'Nunito',
   appBarTheme: const AppBarTheme(
     centerTitle: true,
     backgroundColor: Color(0xFFF5F5F3),
@@ -63,7 +63,7 @@ ThemeData lightMode = ThemeData(
 
 ThemeData darkMode = ThemeData(
   brightness: Brightness.dark,
-  fontFamily: 'Fredoka',
+  fontFamily: 'Nunito',
   appBarTheme: const AppBarTheme(
     centerTitle: true,
     backgroundColor: Colors.black,
