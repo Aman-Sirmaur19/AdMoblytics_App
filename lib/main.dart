@@ -5,10 +5,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'utils/theme.dart';
 import 'firebase_options.dart';
-import 'services/ad_manager.dart';
 import 'providers/tab_provider.dart';
 import 'providers/apps_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/account_provider.dart';
+import 'providers/currency_provider.dart';
+import 'providers/navigation_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/bottom_tab_screen.dart';
 
@@ -21,8 +23,11 @@ Future<void> main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ChangeNotifierProvider(create: (_) => TabProvider()),
       ChangeNotifierProvider(create: (_) => AppsProvider()),
+      ChangeNotifierProvider(create: (_) => AccountProvider()),
+      ChangeNotifierProvider(create: (_) => CurrencyProvider()..loadCurrency()),
     ],
     child: const MyApp(),
   ));
@@ -30,7 +35,6 @@ Future<void> main() async {
 
 Future<void> _initializeMobileAds() async {
   await MobileAds.instance.initialize();
-  AdManager().initialize();
 }
 
 class MyApp extends StatelessWidget {
@@ -40,7 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'AdMoblytics',
+      title: 'Moblytics',
       theme: lightMode,
       darkTheme: darkMode,
       home: const AuthWrapper(),
@@ -66,6 +70,9 @@ class AuthWrapper extends StatelessWidget {
 /*
 currency feature
 initial date of admob earning
-line graph
+line graph without past data
+line graph axis color
 estimated earning in custom days (ML)
+upgrade/downgrade subscriptions
+line chart not showing from start of the axis
 */

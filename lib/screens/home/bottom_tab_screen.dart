@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:in_app_update/in_app_update.dart';
 
+import '../../providers/navigation_provider.dart';
 import '../apps/apps_screen.dart';
 import '../account/account_screen.dart';
 import 'tabs_screen.dart';
@@ -44,6 +46,7 @@ class _BottomTabScreenState extends State<BottomTabScreen> {
   }
 
   void _selectPage(int index) {
+    context.read<NavigationProvider>().increment();
     setState(() {
       _selectedPageIndex = index;
     });

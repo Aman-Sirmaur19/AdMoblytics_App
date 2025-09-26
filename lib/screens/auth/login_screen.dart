@@ -1,10 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:in_app_update/in_app_update.dart';
 
-import '../../services/ad_manager.dart';
-import '../../providers/auth_provider.dart';
 import '../../widgets/custom_banner_ad.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/navigation_provider.dart';
 import '../demo/tabs_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,78 +40,85 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return Scaffold(
       bottomNavigationBar: const CustomBannerAd(),
       body: Column(
         children: [
-          const SizedBox(height: 200),
+          SizedBox(height: isLandscape ? 30 : 200),
           Expanded(
             child: ListView(
               children: [
-                SizedBox(
-                  height: 60,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned(
-                        left: 30,
-                        child: Image.asset(
-                          'assets/images/icon-no-bg.png',
-                          width: 80,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      Positioned(
-                        top: 55,
-                        right: 40,
-                        child: Container(
-                          width: 245,
-                          height: 5,
-                          decoration: BoxDecoration(
-                            color: const Color(0xff34a853),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      const Positioned(
-                        right: 40,
-                        // Adjust this to control the distance between image and text
-                        child: Text(
-                          'dMoblytics',
-                          style: TextStyle(
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  radius: 30,
+                  child: Image.asset('assets/images/icon.png', height: 40),
                 ),
-                const SizedBox(height: 50),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 70),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    text: 'M',
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Colors.red,
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.bold,
+                    ),
                     children: [
-                      Text(
-                        'Login your google account to',
+                      TextSpan(
+                        text: 'o',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                          fontSize: 50,
+                          color: Colors.amber,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      Text(
-                        '📊 See your apps performance\n📈 Get user trends\n💸 Check your apps earning',
-                        style: TextStyle(fontSize: 15, color: Colors.grey),
+                      TextSpan(
+                        text: 'b',
+                        style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'lytics',
+                        style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 50),
+                if (!isLandscape) ...[
+                  const SizedBox(height: 50),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 70),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Login your google account to',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '📊 See your apps performance\n📈 Get user trends\n💸 Check your apps earning',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                ],
                 if (authProvider.accountId == null &&
                     authProvider.user != null) ...[
                   Container(
@@ -134,8 +142,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           OutlinedButton(
-            onPressed: () =>
-                AdManager().navigateWithAd(context, DemoTabsScreen()),
+            onPressed: () {
+              context.read<NavigationProvider>().increment();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => const DemoTabsScreen(),
+                ),
+              );
+            },
             style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.green,
                 side: const BorderSide(color: Colors.green),
@@ -159,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
             icon: Image.asset('assets/images/google.png', width: 20),
             label: const Text('Sign in with Google'),
           ),
-          const SizedBox(height: 50),
+          SizedBox(height: isLandscape ? 20 : 50),
           const Text(
             'MADE WITH ❤️ IN 🇮🇳',
             textAlign: TextAlign.center,

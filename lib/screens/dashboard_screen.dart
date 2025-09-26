@@ -2,19 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../utils/utils.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/custom_banner_ad.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
-
-  Future<void> _launchInBrowser(BuildContext context, Uri url) async {
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      // Dialogs.showErrorSnackBar(context, 'Could not launch $url');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +29,7 @@ class DashboardScreen extends StatelessWidget {
       body: Column(
         children: [
           const Text(
-            'Version: 1.0.4',
+            'Version: 1.0.8',
             textAlign: TextAlign.center,
             style: TextStyle(
               letterSpacing: 1.5,
@@ -79,29 +73,27 @@ class DashboardScreen extends StatelessWidget {
                       const Icon(Icons.star_rate_rounded, color: Colors.amber),
                   title: RichText(
                     text: TextSpan(
-                      text: 'Ad',
+                      text: 'M',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.red,
                         letterSpacing: 0.5,
-                        fontFamily: 'Fredoka',
+                        fontFamily: 'Nunito',
                         fontWeight: FontWeight.w800,
                       ),
                       children: [
                         TextSpan(
-                          text: 'M',
+                          text: 'o',
                           style: const TextStyle(
                             fontSize: 18,
                             color: Colors.amber,
-                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         TextSpan(
-                          text: 'ob',
+                          text: 'b',
                           style: const TextStyle(
                             fontSize: 18,
-                            fontFamily: 'Fredoka',
                             color: Colors.lightBlue,
                             fontWeight: FontWeight.w800,
                           ),
@@ -111,7 +103,6 @@ class DashboardScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.green,
-                            fontFamily: 'Fredoka',
                             fontWeight: FontWeight.w800,
                           ),
                           children: const [
@@ -120,7 +111,6 @@ class DashboardScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.amber,
-                                fontFamily: 'Fredoka',
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -142,7 +132,7 @@ class DashboardScreen extends StatelessWidget {
                         const String appUrl =
                             'https://play.google.com/store/apps/details?id=com.sirmaur.admoblytics';
                         SharePlus.instance.share(ShareParams(
-                          title: 'Check out this awesome AdMoblytics app',
+                          title: 'Check out this awesome Moblytics app',
                           uri: Uri.parse(appUrl),
                         ));
                       },
@@ -155,7 +145,7 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () async {
                         const url =
                             'https://play.google.com/store/apps/details?id=com.sirmaur.admoblytics';
-                        _launchInBrowser(context, Uri.parse(url));
+                        Utils.launchInBrowser(context, Uri.parse(url));
                       },
                       icon: CupertinoIcons.star,
                       title: 'Rate us 5 ⭐',
@@ -165,7 +155,7 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () async {
                         const url =
                             'https://play.google.com/store/apps/developer?id=SIRMAUR';
-                        _launchInBrowser(context, Uri.parse(url));
+                        Utils.launchInBrowser(context, Uri.parse(url));
                       },
                       icon: CupertinoIcons.app_badge,
                       title: 'More Apps',
@@ -240,7 +230,8 @@ class DashboardScreen extends StatelessWidget {
                                     onTap: () async {
                                       const url =
                                           'https://www.youtube.com/@AmanSirmaur';
-                                      _launchInBrowser(context, Uri.parse(url));
+                                      Utils.launchInBrowser(
+                                          context, Uri.parse(url));
                                     },
                                   ),
                                   InkWell(
@@ -250,7 +241,8 @@ class DashboardScreen extends StatelessWidget {
                                     onTap: () async {
                                       const url =
                                           'https://x.com/AmanSirmaur?t=2QWiqzkaEgpBFNmLI38sbA&s=09';
-                                      _launchInBrowser(context, Uri.parse(url));
+                                      Utils.launchInBrowser(
+                                          context, Uri.parse(url));
                                     },
                                   ),
                                   InkWell(
@@ -260,7 +252,8 @@ class DashboardScreen extends StatelessWidget {
                                     onTap: () async {
                                       const url =
                                           'https://www.instagram.com/aman_sirmaur19/';
-                                      _launchInBrowser(context, Uri.parse(url));
+                                      Utils.launchInBrowser(
+                                          context, Uri.parse(url));
                                     },
                                   ),
                                   InkWell(
@@ -270,7 +263,8 @@ class DashboardScreen extends StatelessWidget {
                                     onTap: () async {
                                       const url =
                                           'https://github.com/Aman-Sirmaur19';
-                                      _launchInBrowser(context, Uri.parse(url));
+                                      Utils.launchInBrowser(
+                                          context, Uri.parse(url));
                                     },
                                   ),
                                   InkWell(
@@ -280,7 +274,8 @@ class DashboardScreen extends StatelessWidget {
                                     onTap: () async {
                                       const url =
                                           'https://www.linkedin.com/in/aman-kumar-257613257/';
-                                      _launchInBrowser(context, Uri.parse(url));
+                                      Utils.launchInBrowser(
+                                          context, Uri.parse(url));
                                     },
                                   ),
                                 ],
@@ -300,7 +295,7 @@ class DashboardScreen extends StatelessWidget {
                         text: 'Explore our other apps ',
                         style: TextStyle(
                           fontSize: 16,
-                          fontFamily: 'Fredoka',
+                          fontFamily: 'Nunito',
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.secondary,
                         ),
@@ -310,7 +305,6 @@ class DashboardScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
-                          fontFamily: 'Fredoka',
                           fontWeight: FontWeight.normal,
                         ),
                       )
@@ -320,7 +314,7 @@ class DashboardScreen extends StatelessWidget {
                   onTap: () async {
                     const url =
                         'https://play.google.com/store/apps/details?id=com.sirmaur.attendance_tracker';
-                    _launchInBrowser(context, Uri.parse(url));
+                    Utils.launchInBrowser(context, Uri.parse(url));
                   },
                   tileColor: Colors.blue,
                   imageUrl:
@@ -334,7 +328,7 @@ class DashboardScreen extends StatelessWidget {
                   onTap: () async {
                     const url =
                         'https://play.google.com/store/apps/details?id=com.sirmaur.shreemad_bhagavad_geeta';
-                    _launchInBrowser(context, Uri.parse(url));
+                    Utils.launchInBrowser(context, Uri.parse(url));
                   },
                   tileColor: Colors.amber,
                   imageUrl:

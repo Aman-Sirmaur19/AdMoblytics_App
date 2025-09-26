@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/ad_manager.dart';
 import '../../providers/tab_provider.dart';
+import '../../providers/navigation_provider.dart';
+import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/custom_tab_indicator.dart';
 import '../dashboard_screen.dart';
 import 'home_screen.dart';
@@ -18,6 +19,7 @@ class TabsScreen extends StatefulWidget {
 class _TabsScreenState extends State<TabsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _lastIndex = 2;
 
   @override
   void initState() {
@@ -27,8 +29,11 @@ class _TabsScreenState extends State<TabsScreen>
   }
 
   void _handleTabChange() {
-    if (!_tabController.indexIsChanging ||
-        _tabController.animation!.status == AnimationStatus.completed) {
+    if (_tabController.index != _lastIndex &&
+        (!_tabController.indexIsChanging ||
+            _tabController.animation!.status == AnimationStatus.completed)) {
+      _lastIndex = _tabController.index;
+      context.read<NavigationProvider>().increment();
       Provider.of<TabProvider>(context, listen: false)
           .updateTabIndex(_tabController.index);
     }
@@ -55,11 +60,16 @@ class _TabsScreenState extends State<TabsScreen>
           });
           return Scaffold(
             appBar: AppBar(
-              title: const Text('AdMob Dashboard'),
+              title: const Text('Earning Dashboard'),
               actions: [
                 IconButton(
-                  onPressed: () => AdManager()
-                      .navigateWithAd(context, const DashboardScreen()),
+                  onPressed: () {
+                    context.read<NavigationProvider>().increment();
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => const DashboardScreen()));
+                  },
                   tooltip: 'Dashboard',
                   icon: const Icon(CupertinoIcons.square_grid_2x2),
                 ),
@@ -93,6 +103,7 @@ class _TabsScreenState extends State<TabsScreen>
                 ],
               ),
             ),
+            bottomNavigationBar: const CustomBannerAd(),
             body: TabBarView(
               controller: _tabController,
               children: List.generate(9, (index) => const HomeScreen()),

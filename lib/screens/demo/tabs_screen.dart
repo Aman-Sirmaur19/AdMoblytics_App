@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../services/ad_manager.dart';
 import '../../widgets/custom_tab_indicator.dart';
+import '../../providers/navigation_provider.dart';
 import '../dashboard_screen.dart';
 import 'home_screen.dart';
 
@@ -31,8 +32,15 @@ class _DemoTabsScreenState extends State<DemoTabsScreen>
         title: const Text('AdMob Dashboard'),
         actions: [
           IconButton(
-            onPressed: () =>
-                AdManager().navigateWithAd(context, const DashboardScreen()),
+            onPressed: () {
+              context.read<NavigationProvider>().increment();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => const DashboardScreen(),
+                ),
+              );
+            },
             tooltip: 'Dashboard',
             icon: const Icon(CupertinoIcons.square_grid_2x2),
           ),

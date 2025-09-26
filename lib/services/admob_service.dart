@@ -101,7 +101,7 @@ class AdMobService {
       "MATCH_RATE",
       "SHOW_RATE",
     ],
-    String currencyCode = "USD",
+    required String currencyCode,
     String languageCode = "en",
     List<Map<String, String>> sortConditions = const [],
     List<Map<String, dynamic>> dimensionFilters = const [],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../utils/utils.dart';
+import '../providers/navigation_provider.dart';
 
 class CustomDate extends StatelessWidget {
   final DateTime? startDate;
@@ -37,7 +39,7 @@ class CustomDate extends StatelessWidget {
           child: Text(
             _formattedDateText(),
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.secondary,
             ),
@@ -46,6 +48,7 @@ class CustomDate extends StatelessWidget {
         if (showButton)
           TextButton(
             onPressed: () async {
+              context.read<NavigationProvider>().increment();
               final DateTimeRange? picked = await showDateRangePicker(
                 context: context,
                 firstDate: DateTime(2000),
