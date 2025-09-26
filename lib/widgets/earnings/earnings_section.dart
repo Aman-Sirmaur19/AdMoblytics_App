@@ -1,10 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/ad_manager.dart';
+import '../../providers/navigation_provider.dart';
 import '../../utils/utils.dart';
 import '../../utils/earnings_util.dart';
-import '../../providers/apps_provider.dart';
 import '../../screens/home/app_summary_screen.dart';
 import '../../screens/home/section_details_screen.dart';
 import '../app_icon.dart';
@@ -42,22 +42,11 @@ class _EarningsSectionState extends State<EarningsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [
-      'Estimated Earnings',
-      'eCPM',
-      'Impressions',
-      'Ad Requests',
-      'Matched Requests',
-      'Match Rate',
-      'Show Rate',
-      'Clicks',
-      'CTR',
-    ];
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final totalSize = List.from(widget.data).length;
     return DefaultTabController(
-      length: tabs.length,
+      length: Utils.tabs.length,
       initialIndex: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,11 +136,11 @@ class _EarningsSectionState extends State<EarningsSection> {
                     topRight: Radius.circular(20),
                   ),
                   indicator: CustomTabIndicator(),
-                  tabs: tabs.map((tab) => Tab(text: tab)).toList(),
+                  tabs: Utils.tabs.map((tab) => Tab(text: tab)).toList(),
                 ),
                 Expanded(
                   child: TabBarView(
-                    children: tabs
+                    children: Utils.tabs
                         .map((tabName) => _customColumn(
                               tabName: tabName,
                               data: widget.data,
@@ -163,14 +152,18 @@ class _EarningsSectionState extends State<EarningsSection> {
                 ),
                 if (widget.data.length > 0 && !_showMapView)
                   TextButton(
-                    onPressed: () => AdManager().navigateWithAd(
-                        context,
-                        SectionDetailsScreen(
-                          section: widget.section,
-                          appId: widget.appId,
-                          customStartDate: widget.customStartDate,
-                          customEndDate: widget.customEndDate,
-                        )),
+                    onPressed: () {
+                      context.read<NavigationProvider>().increment();
+                      Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => SectionDetailsScreen(
+                                    section: widget.section,
+                                    appId: widget.appId,
+                                    customStartDate: widget.customStartDate,
+                                    customEndDate: widget.customEndDate,
+                                  )));
+                    },
                     child: const Text('View All'),
                   ),
               ],
@@ -187,8 +180,6 @@ class _EarningsSectionState extends State<EarningsSection> {
     required dynamic pastData,
     required BuildContext context,
   }) {
-    final appsProvider = Provider.of<AppsProvider>(context, listen: false);
-    final apps = appsProvider.apps;
     List sortedData = data is List ? List.from(data) : [];
     EarningsUtil.sortDataByTab(tabName, sortedData);
     List pastSortedData = Utils.alignPastDataToCurrent(
@@ -230,23 +221,27 @@ class _EarningsSectionState extends State<EarningsSection> {
                                 ['dimensionValues']['APP'];
                             final appName = appData['displayLabel'];
                             final appId = appData['value'];
-                            AdManager().navigateWithAd(
+                            context.read<NavigationProvider>().increment();
+                            Navigator.push(
                                 context,
-                                AppSummaryScreen(
-                                  section: widget.section,
-                                  appName: appName,
-                                  appId: appId,
-                                  customStartDate: widget.customStartDate,
-                                  customEndDate: widget.customEndDate,
-                                ));
+                                CupertinoPageRoute(
+                                    builder: (context) => AppSummaryScreen(
+                                          section: widget.section,
+                                          appName: appName,
+                                          appId: appId,
+                                          customStartDate:
+                                              widget.customStartDate,
+                                          customEndDate: widget.customEndDate,
+                                        )));
                           }
                         },
                         leading: widget.section == 'APP'
                             ? AppIcon(
                                 appData: Utils.getAppStoreData(
-                                    apps,
-                                    sortedData[index]['row']['dimensionValues']
-                                        [widget.section]['displayLabel']))
+                                sortedData[index]['row']['dimensionValues']
+                                    [widget.section]['value'],
+                                context,
+                              ))
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(5),
                                 child: LeadingIcon(

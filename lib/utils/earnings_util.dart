@@ -17,7 +17,7 @@ class EarningsUtil {
         }
         startDate = customStartDate;
         endDate = customEndDate;
-        dimensions = [];
+        // dimensions = [];
         final difference = customEndDate.difference(customStartDate).inDays;
         pastEndDate = customStartDate.subtract(const Duration(days: 1));
         pastStartDate = pastEndDate.subtract(Duration(days: difference));
@@ -40,7 +40,7 @@ class EarningsUtil {
       case 3: // Last 7 days
         startDate = currentDate.subtract(const Duration(days: 6));
         endDate = currentDate;
-        dimensions = [];
+        // dimensions = [];
         pastStartDate = currentDate.subtract(const Duration(days: 13));
         pastEndDate = currentDate.subtract(const Duration(days: 7));
         break;
@@ -48,7 +48,7 @@ class EarningsUtil {
       case 4: // This month
         startDate = DateTime(currentDate.year, currentDate.month, 1);
         endDate = currentDate;
-        dimensions = ["MONTH"];
+        // dimensions = ["MONTH"];
         pastStartDate = DateTime(currentDate.year, currentDate.month - 1, 1);
         pastEndDate = DateTime(currentDate.year, currentDate.month, 1)
             .subtract(const Duration(days: 1));
@@ -58,7 +58,7 @@ class EarningsUtil {
         startDate = DateTime(currentDate.year, currentDate.month - 1, 1);
         endDate = DateTime(currentDate.year, currentDate.month, 1)
             .subtract(const Duration(days: 1));
-        dimensions = ["MONTH"];
+        // dimensions = ["MONTH"];
         pastStartDate = DateTime(currentDate.year, currentDate.month - 2, 1);
         pastEndDate = DateTime(currentDate.year, currentDate.month - 1, 1)
             .subtract(const Duration(days: 1));
@@ -67,7 +67,7 @@ class EarningsUtil {
       case 6: // This year
         startDate = DateTime(currentDate.year, 1, 1);
         endDate = currentDate;
-        dimensions = [];
+        // dimensions = [];
         pastStartDate = DateTime(currentDate.year - 1, 1, 1);
         pastEndDate = DateTime(currentDate.year - 1, 12, 31);
         break;
@@ -75,7 +75,7 @@ class EarningsUtil {
       case 7: // Last year
         startDate = DateTime(currentDate.year - 1, 1, 1);
         endDate = DateTime(currentDate.year - 1, 12, 31);
-        dimensions = [];
+        // dimensions = [];
         pastStartDate = DateTime(currentDate.year - 2, 1, 1);
         pastEndDate = DateTime(currentDate.year - 2, 12, 31);
         break;
@@ -83,7 +83,7 @@ class EarningsUtil {
       case 8: // Total
         startDate = DateTime(1970, 1, 1); // Epoch start
         endDate = currentDate;
-        dimensions = [];
+        // dimensions = [];
         pastStartDate = DateTime(1970, 1, 1);
         pastEndDate = currentDate;
         break;
@@ -120,7 +120,9 @@ class EarningsUtil {
             ? int.parse(metrics['ESTIMATED_EARNINGS']['microsValue']) / 1000000
             : 0.0;
       case 'eCPM':
-        return metrics['IMPRESSION_RPM']?['doubleValue'] ?? 0.0;
+        return (metrics['IMPRESSION_RPM']?['doubleValue'] as num?)
+                ?.toDouble() ??
+            0.0;
       case 'Impressions':
         return double.tryParse(
                 metrics['IMPRESSIONS']?['integerValue'] ?? '0') ??

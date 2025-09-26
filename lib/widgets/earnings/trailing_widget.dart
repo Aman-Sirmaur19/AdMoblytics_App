@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../utils/utils.dart';
+import '../../providers/currency_provider.dart';
 
 class TrailingWidget extends StatelessWidget {
   final String tabName;
@@ -21,7 +25,7 @@ class TrailingWidget extends StatelessWidget {
     double currentValue = _getValue(metrics, tabName);
     double previousValue = _getValue(pastMetrics, tabName);
 
-    String formattedCurrent = _formatValue(currentValue, tabName);
+    String formattedCurrent = _formatValue(currentValue, tabName, context);
     String? change = _getChangePercentage(currentValue, previousValue);
 
     return Column(
@@ -57,7 +61,9 @@ class TrailingWidget extends StatelessWidget {
         final micros = metrics['ESTIMATED_EARNINGS']?['microsValue'];
         return micros != null ? int.parse(micros) / 1000000 : 0.0;
       case 'eCPM':
-        return metrics['IMPRESSION_RPM']?['doubleValue'] ?? 0.0;
+        return (metrics['IMPRESSION_RPM']?['doubleValue'] as num?)
+                ?.toDouble() ??
+            0.0;
       case 'Impressions':
         return double.tryParse(
                 metrics['IMPRESSIONS']?['integerValue'] ?? '0') ??
@@ -87,11 +93,13 @@ class TrailingWidget extends StatelessWidget {
     }
   }
 
-  String _formatValue(double value, String tab) {
+  String _formatValue(double value, String tab, BuildContext context) {
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
     switch (tab) {
       case 'Estimated Earnings':
       case 'eCPM':
-        return '\$ ${value.toStringAsFixed(4)}';
+        return '${currencyProvider.currencySymbol} ${value.toStringAsFixed(2)}';
       case 'Match Rate':
       case 'Show Rate':
       case 'CTR':
@@ -105,6 +113,6 @@ class TrailingWidget extends StatelessWidget {
     if (past == 0 && current == 0) return null;
     if (past == 0) return '↑ 100%';
     double change = ((current - past) / past) * 100;
-    return '${change >= 0 ? '↑' : '↓'} ${change.abs().toStringAsFixed(1)}%';
+    return '${change >= 0 ? '↑' : '↓'} ${Utils.formatCompactCustom(change)}%';
   }
 }

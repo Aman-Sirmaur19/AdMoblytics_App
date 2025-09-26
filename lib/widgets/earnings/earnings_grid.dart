@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/utils.dart';
+import '../../providers/currency_provider.dart';
+import 'line_chart_widget.dart';
 
 class EarningsGrid extends StatefulWidget {
   final dynamic data;
@@ -14,6 +17,7 @@ class EarningsGrid extends StatefulWidget {
 
 class _EarningsGridState extends State<EarningsGrid> {
   bool _isPastDataEmpty = false;
+  bool _showLineChart = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +26,33 @@ class _EarningsGridState extends State<EarningsGrid> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 5),
-        const Text(
-          'Total',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Total',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (!_isPastDataEmpty)
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _showLineChart = !_showLineChart;
+                  });
+                },
+                tooltip: _showLineChart ? 'Grid view' : 'Line chart',
+                icon: Icon(_showLineChart
+                    ? Icons.more_horiz_rounded
+                    : Icons.stacked_line_chart_rounded),
+              ),
+          ],
         ),
-        SizedBox(height: 5),
         Container(
           width: double.infinity,
-          height: 100,
+          height: _showLineChart ? 300 : 100,
           alignment: Alignment.center,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
@@ -41,262 +61,164 @@ class _EarningsGridState extends State<EarningsGrid> {
           ),
           child: widget.data.isEmpty
               ? const Text('No any data to show')
-              : GridView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 9,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1,
-                    mainAxisSpacing: 5,
-                    mainAxisExtent: 150,
-                  ),
-                  itemBuilder: (context, index) {
-                    switch (index) {
-                      case 0:
-                        double value = double.parse(
-                                widget.data[0]['row'] != null
-                                    ? widget.data[0]['row']['metricValues']
-                                        ['ESTIMATED_EARNINGS']['microsValue']
-                                    : '0.0') /
-                            1e6;
-                        double pastValue = double.parse(!_isPastDataEmpty &&
-                                    widget.pastData[0]['row'] != null
-                                ? widget.pastData[0]['row']['metricValues']
-                                    ['ESTIMATED_EARNINGS']['microsValue']
-                                : '0.0') /
-                            1e6;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Estimated Earnings',
-                          value: '\$ ${value.toStringAsFixed(3)}',
-                          pastValueString:
-                              '\$ ${difference > 0 ? '+${difference.toStringAsFixed(3)}' : difference.toStringAsFixed(3)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 1:
-                        double value = widget.data[0]['row'] != null &&
-                                widget.data[0]['row']['metricValues']
-                                        ['IMPRESSION_RPM'] !=
-                                    null
-                            ? widget.data[0]['row']['metricValues']
-                                ['IMPRESSION_RPM']['doubleValue']
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null &&
-                                widget.pastData[0]['row']['metricValues']
-                                        ['IMPRESSION_RPM'] !=
-                                    null
-                            ? widget.pastData[0]['row']['metricValues']
-                                ['IMPRESSION_RPM']['doubleValue']
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'eCPM',
-                          value: '\$ ${value.toStringAsFixed(2)}',
-                          pastValueString:
-                              '\$ ${difference > 0 ? '+${difference.toStringAsFixed(2)}' : difference.toStringAsFixed(2)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 2:
-                        double value = widget.data[0]['row'] != null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                ['IMPRESSIONS']['integerValue'])
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null
-                            ? double.parse(widget.pastData[0]['row']
-                                ['metricValues']['IMPRESSIONS']['integerValue'])
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Impressions',
-                          value: value.toStringAsFixed(0),
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(0)}' : difference.toStringAsFixed(0)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 3:
-                        double value = widget.data[0]['row'] != null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                ['AD_REQUESTS']['integerValue'])
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null
-                            ? double.parse(widget.pastData[0]['row']
-                                ['metricValues']['AD_REQUESTS']['integerValue'])
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Ad Requests',
-                          value: value.toStringAsFixed(0),
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(0)}' : difference.toStringAsFixed(0)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 4:
-                        double value = widget.data[0]['row'] != null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                ['MATCHED_REQUESTS']['integerValue'])
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null
-                            ? double.parse(widget.pastData[0]['row']
-                                    ['metricValues']['MATCHED_REQUESTS']
-                                ['integerValue'])
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Matched Requests',
-                          value: value.toStringAsFixed(0),
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(0)}' : difference.toStringAsFixed(0)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 5:
-                        double value = widget.data[0]['row'] != null &&
-                                widget.data[0]['row']['metricValues']
-                                        ['MATCH_RATE'] !=
-                                    null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                        ['MATCH_RATE']['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null &&
-                                widget.pastData[0]['row']['metricValues']
-                                        ['MATCH_RATE'] !=
-                                    null
-                            ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['MATCH_RATE']
-                                        ['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Match Rate',
-                          value: '${value.toStringAsFixed(2)} %',
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(2)}' : difference.toStringAsFixed(2)} % (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 6:
-                        double value = widget.data[0]['row'] != null &&
-                                widget.data[0]['row']['metricValues']
-                                        ['SHOW_RATE'] !=
-                                    null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                        ['SHOW_RATE']['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null &&
-                                widget.pastData[0]['row']['metricValues']
-                                        ['SHOW_RATE'] !=
-                                    null
-                            ? double.parse(widget.pastData[0]['row']
-                                        ['metricValues']['SHOW_RATE']
-                                        ['doubleValue']
-                                    .toString()) *
-                                100
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Show Rate',
-                          value: '${value.toStringAsFixed(2)} %',
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(2)}' : difference.toStringAsFixed(2)} % (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 7:
-                        double value = widget.data[0]['row'] != null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                ['CLICKS']['integerValue'])
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null
-                            ? double.parse(widget.pastData[0]['row']
-                                ['metricValues']['CLICKS']['integerValue'])
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'Clicks',
-                          value: value.toStringAsFixed(0),
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(0)}' : difference.toStringAsFixed(0)} (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      case 8:
-                        double value = widget.data[0]['row'] != null &&
-                                widget.data[0]['row']['metricValues']
-                                        ['IMPRESSION_CTR'] !=
-                                    null
-                            ? double.parse(widget.data[0]['row']['metricValues']
-                                    ['IMPRESSION_CTR']['doubleValue']
-                                .toString())
-                            : 0;
-                        double pastValue = !_isPastDataEmpty &&
-                                widget.pastData[0]['row'] != null &&
-                                widget.pastData[0]['row']['metricValues']
-                                        ['IMPRESSION_CTR'] !=
-                                    null
-                            ? double.parse(widget.pastData[0]['row']
-                                    ['metricValues']['IMPRESSION_CTR']
-                                    ['doubleValue']
-                                .toString())
-                            : 0;
-                        double difference = value - pastValue;
-                        String percent = pastValue == 0
-                            ? '0.0'
-                            : (difference * 100 / pastValue).toStringAsFixed(1);
-                        return _customCard(
-                          context,
-                          title: 'CTR',
-                          value: '${value.toStringAsFixed(2)} %',
-                          pastValueString:
-                              '${difference > 0 ? '+${difference.toStringAsFixed(2)}' : difference.toStringAsFixed(2)} % (${difference > 0 ? '+$percent' : percent} %)',
-                          difference: difference,
-                        );
-                      default:
-                        return const SizedBox.shrink();
-                    }
-                  },
-                ),
+              : _showLineChart
+                  ? LineChartWidget(
+                      data: widget.data,
+                      pastData: widget.pastData,
+                    )
+                  : MetricsGrid(
+                      data: widget.data,
+                      pastData: widget.pastData ?? [],
+                      isPastDataEmpty: _isPastDataEmpty,
+                    ),
         ),
       ],
+    );
+  }
+}
+
+class MetricsGrid extends StatelessWidget {
+  final List<dynamic> data; // Current daily data
+  final List<dynamic> pastData; // Past daily data
+  final bool isPastDataEmpty;
+
+  const MetricsGrid({
+    super.key,
+    required this.data,
+    required this.pastData,
+    required this.isPastDataEmpty,
+  });
+
+  // Metric configuration: title, key, type (sum or average)
+  static final List<Map<String, dynamic>> metrics = [
+    {
+      'title': 'Estimated Earnings',
+      'key': 'ESTIMATED_EARNINGS',
+      'type': 'sum',
+      'isMicros': true,
+      'isCurrency': true
+    },
+    {
+      'title': 'eCPM',
+      'key': 'IMPRESSION_RPM',
+      'type': 'average',
+      'isCurrency': true
+    },
+    {'title': 'Impressions', 'key': 'IMPRESSIONS', 'type': 'sum'},
+    {'title': 'Ad Requests', 'key': 'AD_REQUESTS', 'type': 'sum'},
+    {'title': 'Matched Requests', 'key': 'MATCHED_REQUESTS', 'type': 'sum'},
+    {
+      'title': 'Match Rate',
+      'key': 'MATCH_RATE',
+      'type': 'average',
+      'isPercentage': true
+    },
+    {
+      'title': 'Show Rate',
+      'key': 'SHOW_RATE',
+      'type': 'average',
+      'isPercentage': true
+    },
+    {'title': 'Clicks', 'key': 'CLICKS', 'type': 'sum'},
+    {
+      'title': 'CTR',
+      'key': 'IMPRESSION_CTR',
+      'type': 'average',
+      'isPercentage': true
+    },
+  ];
+
+  double _extractValue(Map<String, dynamic> row, String key,
+      {bool isMicros = false}) {
+    if (row['metricValues']?[key] == null) return 0.0;
+    final metric = row['metricValues'][key];
+    double value = 0.0;
+
+    if (metric['doubleValue'] != null) {
+      value = (metric['doubleValue'] as num).toDouble();
+    } else if (metric['integerValue'] != null) {
+      value = double.parse(metric['integerValue']);
+    } else if (isMicros && metric['microsValue'] != null) {
+      value = double.parse(metric['microsValue']) / 1e6;
+    }
+
+    return value;
+  }
+
+  double _aggregate(List<dynamic> rows, Map<String, dynamic> metric) {
+    final key = metric['key'];
+    final type = metric['type'];
+    final isMicros = metric['isMicros'] ?? false;
+    final isPercentage = metric['isPercentage'] ?? false; // add this
+
+    List<double> values = rows
+        .map((row) => _extractValue(row['row'] ?? {}, key, isMicros: isMicros))
+        .toList();
+
+    if (values.isEmpty) return 0.0;
+
+    double result = 0.0;
+    if (type == 'sum') {
+      result = values.reduce((a, b) => a + b);
+    } else if (type == 'average') {
+      result = values.reduce((a, b) => a + b) / values.length;
+    }
+
+    if (isPercentage) result *= 100; // convert to percentage scale
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
+
+    return GridView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: metrics.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 1,
+        mainAxisSpacing: 5,
+        mainAxisExtent: 150,
+      ),
+      itemBuilder: (context, index) {
+        final metric = metrics[index];
+
+        double value = _aggregate(data, metric);
+        double pastValue =
+            !isPastDataEmpty ? _aggregate(pastData, metric) : 0.0;
+        double difference = value - pastValue;
+
+// MODIFIED: Calculate the percentage as a 'double', not a 'String'.
+// Renamed to 'percentValue' for clarity.
+        double percentValue =
+            pastValue == 0 ? 0.0 : (difference * 100 / pastValue);
+
+// This part is correct and unchanged
+        String displayValue = metric['isPercentage'] == true
+            ? '${value.toStringAsFixed(2)} %'
+            : metric['isCurrency'] == true
+                ? '${currencyProvider.currencySymbol} ${value.toStringAsFixed(3)}'
+                : value.toStringAsFixed(0);
+
+// MODIFIED: Use the 'percentValue' double and format it directly inside the string.
+// This fixes the error. I also simplified the logic for adding the '+' sign.
+        String pastValueString = !isPastDataEmpty
+            ? metric['isPercentage'] == true
+                ? '${difference > 0 ? '+' : ''}${difference.toStringAsFixed(2)} % (${percentValue > 0 ? '+' : ''}${Utils.formatCompactCustom(percentValue)} %)'
+                : metric['isCurrency'] == true
+                    ? '${currencyProvider.currencySymbol} ${difference > 0 ? '+' : ''}${Utils.formatCompactCustom(difference)} (${percentValue > 0 ? '+' : ''}${Utils.formatCompactCustom(percentValue)} %)'
+                    : '${difference > 0 ? '+' : ''}${Utils.formatCompactCustom(difference)} (${percentValue > 0 ? '+' : ''}${Utils.formatCompactCustom(percentValue)} %)'
+            : '';
+
+        return _customCard(
+          context,
+          title: metric['title'],
+          value: displayValue,
+          pastValueString: pastValueString,
+          difference: difference,
+        );
+      },
     );
   }
 
@@ -318,11 +240,11 @@ class _EarningsGridState extends State<EarningsGrid> {
         children: [
           Container(
             width: double.infinity,
-            margin: EdgeInsets.only(bottom: _isPastDataEmpty ? 0 : 4),
+            margin: EdgeInsets.only(bottom: pastValueString.isEmpty ? 0 : 4),
             padding: const EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: Colors.blue,
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
@@ -337,7 +259,7 @@ class _EarningsGridState extends State<EarningsGrid> {
               ),
             ),
           ),
-          if (_isPastDataEmpty) Spacer(),
+          if (pastValueString.isEmpty) const Spacer(),
           Text(
             value,
             textAlign: TextAlign.center,
@@ -347,8 +269,8 @@ class _EarningsGridState extends State<EarningsGrid> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (_isPastDataEmpty) Spacer(),
-          if (!_isPastDataEmpty)
+          if (pastValueString.isEmpty) const Spacer(),
+          if (pastValueString.isNotEmpty)
             Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(

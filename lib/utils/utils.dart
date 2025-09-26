@@ -1,8 +1,36 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../providers/apps_provider.dart';
 
 class Utils {
+  static final tabs = [
+    'Estimated Earnings',
+    'eCPM',
+    'Impressions',
+    'Ad Requests',
+    'Matched Requests',
+    'Match Rate',
+    'Show Rate',
+    'Clicks',
+    'CTR',
+  ];
+
+  static final metricKeys = {
+    'Estimated Earnings': 'ESTIMATED_EARNINGS',
+    'eCPM': 'IMPRESSION_RPM',
+    'Impressions': 'IMPRESSIONS',
+    'Ad Requests': 'AD_REQUESTS',
+    'Matched Requests': 'MATCHED_REQUESTS',
+    'Match Rate': 'MATCH_RATE',
+    'Show Rate': 'SHOW_RATE',
+    'Clicks': 'CLICKS',
+    'CTR': 'IMPRESSION_CTR',
+  };
+
   static void printFullData(dynamic data) {
     final prettyJson = const JsonEncoder.withIndent('  ').convert(data);
     const chunkSize = 1000;
@@ -17,14 +45,16 @@ class Utils {
   }
 
   static Map<String, String>? getAppStoreData(
-      List<Map<String, dynamic>> appsList, String targetDisplayName) {
-    for (final app in appsList) {
-      final manualName = app['manualAppInfo']?['displayName'];
-      final linkedName = app['linkedAppInfo']?['displayName'];
-
-      if (manualName == targetDisplayName || linkedName == targetDisplayName) {
+    String appId,
+    BuildContext context,
+  ) {
+    final appsProvider = Provider.of<AppsProvider>(context, listen: false);
+    List<Map<String, dynamic>> apps = appsProvider.apps;
+    for (final app in apps) {
+      if (app['appId'] == appId) {
         return {
-          'appId': app['linkedAppInfo'] != null
+          'appId': appId,
+          'appStoreId': app['appApprovalState'] == 'APPROVED'
               ? app['linkedAppInfo']['appStoreId']
               : app['appApprovalState'],
           'platform': app['platform'],
@@ -324,5 +354,67 @@ class Utils {
       final id = item['row']?['dimensionValues']?[section]?['value'];
       return pastDataMap[id] ?? {};
     }).toList();
+  }
+
+  static Future<void> launchInBrowser(BuildContext context, Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // Dialogs.showErrorSnackBar(context, 'Could not launch $url');
+    }
+  }
+
+  static Uri? getStoreUrl(String appStoreId) {
+    if (appStoreId != 'ACTION_REQUIRED') {
+      if (appStoreId.contains('com')) {
+        return Uri.parse(
+            "https://play.google.com/store/apps/details?id=$appStoreId");
+      } else {
+        return Uri.parse("https://apps.apple.com/app/id$appStoreId");
+      }
+    }
+    return null;
+  }
+
+  /// A custom function to format a number into a compact representation (e.g., 1.2k, 5M).
+  static String formatCompactCustom(num number) {
+    // First, handle numbers that don't need a suffix (e.g., 123 or 123.45)
+    if (number.abs() < 1000) {
+      // Check if the number is whole
+      if (number % 1 == 0) {
+        return number.toStringAsFixed(0); // No decimals for whole numbers
+      } else {
+        return number.toStringAsFixed(1); // Two decimals for fractional numbers
+      }
+    }
+
+    // Define the suffixes for large numbers
+    final Map<double, String> suffixes = {
+      1e12: 'T', // Trillion
+      1e9: 'B', // Billion
+      1e6: 'M', // Million
+      1e3: 'k', // Thousand
+    };
+
+    // Find the correct suffix and divisor
+    for (final threshold in suffixes.keys) {
+      if (number.abs() >= threshold) {
+        // Calculate the new value (e.g., 2500 becomes 2.5)
+        final double value = number / threshold;
+        String formattedValue;
+
+        // Check if the NEW value is a whole number (e.g., 2.0)
+        // A small tolerance (epsilon) is used for robust floating-point comparison
+        if ((value - value.truncate()).abs() < 1e-9) {
+          formattedValue = value.toStringAsFixed(0); // e.g., "2"
+        } else {
+          formattedValue = value.toStringAsFixed(2); // e.g., "2.50"
+        }
+
+        // Append the correct suffix and return
+        return '$formattedValue${suffixes[threshold]}';
+      }
+    }
+
+    // Fallback for any unexpected cases
+    return number.toStringAsFixed(0);
   }
 }

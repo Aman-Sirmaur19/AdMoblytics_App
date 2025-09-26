@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/dialogs.dart';
 import '../../utils/earnings_util.dart';
 import '../../utils/apps_earning_util.dart';
 import '../../services/admob_service.dart';
 import '../../providers/tab_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/currency_provider.dart';
+import '../../utils/utils.dart';
+import '../../widgets/app_icon.dart';
 import '../../widgets/custom_date.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/custom_tab_indicator.dart';
@@ -77,6 +81,8 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
 
   Future<Map<String, dynamic>> _loadAllReports(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
     final tabIndex =
         Provider.of<TabProvider>(context, listen: false).selectedTabIndex;
@@ -111,6 +117,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
           startDate: earningsGridRange['startDate'],
           endDate: earningsGridRange['endDate'],
           dimensions: earningsGridRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           dimensionFilters: [
             {
               "dimension": "APP",
@@ -128,6 +135,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
           startDate: adUnitRange['startDate'],
           endDate: adUnitRange['endDate'],
           dimensions: adUnitRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           dimensionFilters: [
             {
               "dimension": "APP",
@@ -146,6 +154,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
           startDate: countryRange['startDate'],
           endDate: countryRange['endDate'],
           dimensions: countryRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           dimensionFilters: [
             {
               "dimension": "APP",
@@ -165,6 +174,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
             startDate: earningsGridRange['pastStartDate'],
             endDate: earningsGridRange['pastEndDate'],
             dimensions: earningsGridRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             dimensionFilters: [
               {
                 "dimension": "APP",
@@ -183,6 +193,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
             startDate: adUnitRange['pastStartDate'],
             endDate: adUnitRange['pastEndDate'],
             dimensions: adUnitRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             dimensionFilters: [
               {
                 "dimension": "APP",
@@ -202,6 +213,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
             startDate: countryRange['pastStartDate'],
             endDate: countryRange['pastEndDate'],
             dimensions: countryRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             dimensionFilters: [
               {
                 "dimension": "APP",
@@ -255,16 +267,6 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
             _customStartDate = dateRange['startDate'];
             _customEndDate = dateRange['endDate'];
           });
-          // _customStartDate = tabProvider.selectedTabIndex == 0 &&
-          //         (widget.customStartDate == null ||
-          //             widget.customEndDate == null)
-          //     ? DateTime.now()
-          //     : widget.customStartDate;
-          // _customEndDate = tabProvider.selectedTabIndex == 0 &&
-          //         (widget.customStartDate == null ||
-          //             widget.customEndDate == null)
-          //     ? DateTime.now()
-          //     : widget.customEndDate;
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
@@ -273,37 +275,95 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
                 icon: const Icon(CupertinoIcons.chevron_back),
               ),
               title: Text(widget.section == 'APP'
-                  ? widget.appName
+                  ? 'App'
                   : widget.section == 'AD_UNIT'
                       ? 'Ad Units'
                       : 'Countries'),
-              bottom: TabBar(
-                isScrollable: true,
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                labelColor: Colors.blue,
-                unselectedLabelColor:
-                    Theme.of(context).colorScheme.secondaryContainer,
-                tabAlignment: TabAlignment.start,
-                splashBorderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    final appData =
+                        Utils.getAppStoreData(widget.appId, context);
+                    final storeUrl = Utils.getStoreUrl(appData!['appStoreId']!);
+                    if (storeUrl != null) {
+                      Utils.launchInBrowser(context, storeUrl);
+                    } else {
+                      Dialogs.showErrorSnackBar(
+                          context, 'App not yet published!');
+                    }
+                  },
+                  tooltip: 'Visit Store',
+                  icon: const Icon(
+                    CupertinoIcons.link,
+                    size: 20,
+                    color: Colors.blue,
+                  ),
+                )
+              ],
+              bottom: PreferredSize(
+                preferredSize: Size(double.infinity, 95),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: ListTile(
+                        minTileHeight: 0,
+                        minVerticalPadding: 0,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 5),
+                        tileColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        leading: AppIcon(
+                            appData:
+                                Utils.getAppStoreData(widget.appId, context)),
+                        title: Text(
+                          widget.appName,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        subtitle: Text(
+                          widget.appId.split('app-').last,
+                          style: TextStyle(
+                            color: Colors.grey,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                    TabBar(
+                      isScrollable: true,
+                      controller: _tabController,
+                      dividerColor: Colors.transparent,
+                      labelColor: Colors.blue,
+                      unselectedLabelColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      tabAlignment: TabAlignment.start,
+                      splashBorderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                      indicator: CustomTabIndicator(),
+                      onTap: (index) =>
+                          Provider.of<TabProvider>(context, listen: false)
+                              .updateTabIndex(index),
+                      tabs: const <Widget>[
+                        Tab(text: 'Custom'),
+                        Tab(text: 'Yesterday'),
+                        Tab(text: 'Today'),
+                        Tab(text: 'Last 7 days'),
+                        Tab(text: 'This month'),
+                        Tab(text: 'Last month'),
+                        Tab(text: 'This year'),
+                        Tab(text: 'Last year'),
+                        Tab(text: 'Total'),
+                      ],
+                    ),
+                  ],
                 ),
-                indicator: CustomTabIndicator(),
-                onTap: (index) =>
-                    Provider.of<TabProvider>(context, listen: false)
-                        .updateTabIndex(index),
-                tabs: const <Widget>[
-                  Tab(text: 'Custom'),
-                  Tab(text: 'Yesterday'),
-                  Tab(text: 'Today'),
-                  Tab(text: 'Last 7 days'),
-                  Tab(text: 'This month'),
-                  Tab(text: 'Last month'),
-                  Tab(text: 'This year'),
-                  Tab(text: 'Last year'),
-                  Tab(text: 'Total'),
-                ],
               ),
             ),
             bottomNavigationBar: const CustomBannerAd(),
@@ -349,6 +409,7 @@ class _AppSummaryScreenState extends State<AppSummaryScreen>
                               pastData: data['pastEarningsGrid'],
                             ),
                             const SizedBox(height: 10),
+                            CustomBannerAd(),
                             EarningsSection(
                               section: 'AD_UNIT',
                               data: data['adUnit'],

@@ -7,6 +7,7 @@ import '../../services/admob_service.dart';
 import '../../providers/tab_provider.dart';
 import '../../providers/apps_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/currency_provider.dart';
 import '../../widgets/custom_date.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/earnings/earnings_grid.dart';
@@ -42,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Map<String, dynamic>> _loadAllReports(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
     final appsProvider = Provider.of<AppsProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
     if (!appsProvider.isLoaded) {
@@ -95,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
           startDate: earningsGridRange['startDate'],
           endDate: earningsGridRange['endDate'],
           dimensions: earningsGridRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
         ),
       ),
       admobService.generateNetworkReport(
@@ -104,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
           startDate: appRange['startDate'],
           endDate: appRange['endDate'],
           dimensions: appRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           sortConditions: appRange['sortConditions'],
         ),
       ),
@@ -114,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           startDate: adUnitRange['startDate'],
           endDate: adUnitRange['endDate'],
           dimensions: adUnitRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           sortConditions: adUnitRange['sortConditions'],
         ),
       ),
@@ -124,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           startDate: countryRange['startDate'],
           endDate: countryRange['endDate'],
           dimensions: countryRange['dimensions'],
+          currencyCode: currencyProvider.currencyCode,
           sortConditions: countryRange['sortConditions'],
         ),
       ),
@@ -135,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             startDate: earningsGridRange['pastStartDate'],
             endDate: earningsGridRange['pastEndDate'],
             dimensions: earningsGridRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
           ),
         ),
       if (_tabProvider!.selectedTabIndex != 8)
@@ -145,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
             startDate: appRange['pastStartDate'],
             endDate: appRange['pastEndDate'],
             dimensions: appRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             sortConditions: appRange['sortConditions'],
           ),
         ),
@@ -156,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
             startDate: adUnitRange['pastStartDate'],
             endDate: adUnitRange['pastEndDate'],
             dimensions: adUnitRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             sortConditions: adUnitRange['sortConditions'],
           ),
         ),
@@ -167,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
             startDate: countryRange['pastStartDate'],
             endDate: countryRange['pastEndDate'],
             dimensions: countryRange['dimensions'],
+            currencyCode: currencyProvider.currencyCode,
             sortConditions: countryRange['sortConditions'],
           ),
         ),
@@ -233,7 +244,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _customStartDate = dateRange['startDate'];
     _customEndDate = dateRange['endDate'];
     return Scaffold(
-      bottomNavigationBar: const CustomBannerAd(),
       body: RefreshIndicator(
         onRefresh: _refresh,
         color: Colors.blue,
@@ -269,6 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     pastData: data['pastEarningsGrid'],
                   ),
                   const SizedBox(height: 10),
+                  CustomBannerAd(),
                   EarningsSection(
                     section: 'APP',
                     data: data['app'],

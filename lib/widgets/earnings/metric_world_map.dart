@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:countries_world_map/countries_world_map.dart';
 import 'package:countries_world_map/data/maps/world_map.dart';
 
-import '../../utils/dialogs.dart';
 import '../../utils/utils.dart';
+import '../../utils/dialogs.dart';
+import '../../providers/currency_provider.dart';
 
 class MetricWorldMap extends StatelessWidget {
   final List<dynamic> data;
@@ -95,6 +97,8 @@ class MetricWorldMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
     final metricMap = getCountryMetricMap(data, tabName);
     final colorMap = getCountryColors(metricMap);
 
@@ -111,7 +115,7 @@ class MetricWorldMap extends StatelessWidget {
         final label = tabName.contains('Rate') || tabName == 'CTR'
             ? '${value.toStringAsFixed(2)} %'
             : tabName.contains('Earnings') || tabName == 'eCPM'
-                ? '\$${value.toStringAsFixed(4)}'
+                ? '${currencyProvider.currencySymbol}${value.toStringAsFixed(4)}'
                 : value.toInt();
         Dialogs.showSnackBar(
             context,

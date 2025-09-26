@@ -5,16 +5,16 @@ import 'package:provider/provider.dart';
 import '../../utils/utils.dart';
 import '../../utils/earnings_util.dart';
 import '../../utils/apps_earning_util.dart';
-import '../../services/ad_manager.dart';
 import '../../services/admob_service.dart';
 import '../../providers/tab_provider.dart';
-import '../../providers/apps_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/currency_provider.dart';
+import '../../providers/navigation_provider.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/custom_date.dart';
+import '../../widgets/leading_icon.dart';
 import '../../widgets/custom_banner_ad.dart';
 import '../../widgets/custom_tab_indicator.dart';
-import '../../widgets/leading_icon.dart';
 import '../../widgets/earnings/trailing_widget.dart';
 import '../../widgets/earnings/metric_world_map.dart';
 import '../../widgets/earnings/earnings_pie_chart.dart';
@@ -95,6 +95,8 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
 
   Future<Map<String, dynamic>> _loadReport(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currencyProvider =
+        Provider.of<CurrencyProvider>(context, listen: false);
     final admobService = AdMobService(authProvider.accessToken!);
     final dimensionName = widget.section == 'AD_UNIT'
         ? "AD_UNIT"
@@ -124,6 +126,7 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
           startDate: dateRangeData["startDate"],
           endDate: dateRangeData["endDate"],
           dimensions: dimensions,
+          currencyCode: currencyProvider.currencyCode,
           sortConditions: sortConditions,
           dimensionFilters: widget.appId != ''
               ? [
@@ -145,6 +148,7 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
             startDate: dateRangeData["pastStartDate"],
             endDate: dateRangeData["pastEndDate"],
             dimensions: dimensions,
+            currencyCode: currencyProvider.currencyCode,
             sortConditions: sortConditions,
             dimensionFilters: widget.appId != ''
                 ? [
@@ -330,8 +334,6 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
     required dynamic pastData,
     required BuildContext context,
   }) {
-    final appsProvider = Provider.of<AppsProvider>(context, listen: false);
-    final apps = appsProvider.apps;
     // List sortedData = List.from(data);
     List sortedData = data is List ? List.from(data) : [];
     EarningsUtil.sortDataByTab(tabName, sortedData);
@@ -342,8 +344,9 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
     );
     return ListView(
       padding: EdgeInsets.symmetric(
-        horizontal: _showMapView ? 0 : 5,
-        vertical: _showMapView ? 20 : 0,
+        // horizontal: _showMapView ? 0 : 5,
+        // vertical: _showMapView ? 20 : 0,
+        horizontal: 5,
       ),
       children: [
         const SizedBox(height: 5),
@@ -402,10 +405,13 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                 tileColor: Theme.of(context).colorScheme.primaryContainer,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
-                onTap: () => widget.section == 'APP'
-                    ? AdManager().navigateWithAd(
-                        context,
-                        AppSummaryScreen(
+                onTap: () {
+                  if (widget.section == 'APP') {
+                    context.read<NavigationProvider>().increment();
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (_) => AppSummaryScreen(
                           section: widget.section,
                           appName: sortedData[index]['row']['dimensionValues']
                               [widget.section]['displayLabel'],
@@ -413,14 +419,18 @@ class _SectionDetailsScreenState extends State<SectionDetailsScreen>
                               [widget.section]['value'],
                           customStartDate: _customStartDate,
                           customEndDate: _customEndDate,
-                        ))
-                    : null,
+                        ),
+                      ),
+                    );
+                  }
+                },
                 leading: widget.section == 'APP'
                     ? AppIcon(
                         appData: Utils.getAppStoreData(
-                            apps,
-                            sortedData[index]['row']['dimensionValues']
-                                [widget.section]['displayLabel']))
+                        sortedData[index]['row']['dimensionValues']
+                            [widget.section]['value'],
+                        context,
+                      ))
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(5),
                         child: LeadingIcon(
